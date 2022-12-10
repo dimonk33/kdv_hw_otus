@@ -16,8 +16,7 @@ func main() {
 
 // Unpack Распаковка строки.
 func Unpack(inStr string) (string, error) {
-	_, errInt := strconv.Atoi(inStr)
-	if errInt == nil {
+	if _, errInt := strconv.Atoi(inStr); errInt == nil {
 		return "", ErrInvalidString
 	}
 
