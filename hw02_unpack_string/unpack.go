@@ -47,7 +47,6 @@ func Unpack(inStr string) (string, error) {
 
 		if prevSym != rune(0) {
 			builder.WriteRune(prevSym)
-
 		}
 		prevSym = r
 	}
