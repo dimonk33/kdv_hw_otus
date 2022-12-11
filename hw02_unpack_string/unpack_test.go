@@ -1,4 +1,4 @@
-package main
+package hw02unpackstring
 
 import (
 	"errors"
@@ -23,6 +23,7 @@ func TestUnpack(t *testing.T) {
 		{input: "\n5\\\\3", expected: "\n\n\n\n\n\\\\\\"},
 		{input: "\t3\\t\t", expected: "\t\t\tt\t"},
 		{input: "aaa0b", expected: "aab"},
+		{input: "a9b0", expected: "aaaaaaaaa"},
 	}
 
 	for _, tc := range tests {

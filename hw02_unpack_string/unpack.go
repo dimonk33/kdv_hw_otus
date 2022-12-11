@@ -1,18 +1,14 @@
-package main
+package hw02unpackstring
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
+	"strings"
+	"unicode"
 )
 
 // ErrInvalidString Сообщение об ошибке.
 var ErrInvalidString = errors.New("invalid string")
-
-func main() {
-	str, err := Unpack(string("aaa10b"))
-	fmt.Println(str, err)
-}
 
 // Unpack Распаковка строки.
 func Unpack(inStr string) (string, error) {
@@ -21,13 +17,13 @@ func Unpack(inStr string) (string, error) {
 	}
 
 	isEscape := false
-	outStr := ""
 	prevSym := rune(0)
+	builder := strings.Builder{}
 
 	for _, r := range inStr {
 		if isEscape {
 			if prevSym != rune(0) {
-				outStr += string(prevSym)
+				builder.WriteRune(prevSym)
 			}
 			prevSym = r
 			isEscape = false
@@ -39,27 +35,26 @@ func Unpack(inStr string) (string, error) {
 			continue
 		}
 
-		if r >= '0' && r <= '9' {
+		if unicode.IsDigit(r) {
 			if prevSym == rune(0) {
 				return "", ErrInvalidString
 			}
 			count, _ := strconv.Atoi(string(r))
-			for i := 0; i < count; i++ {
-				outStr += string(prevSym)
-			}
+			builder.WriteString(strings.Repeat(string(prevSym), count))
 			prevSym = rune(0)
 			continue
 		}
 
 		if prevSym != rune(0) {
-			outStr += string(prevSym)
+			builder.WriteRune(prevSym)
+
 		}
 		prevSym = r
 	}
 
 	if prevSym != rune(0) {
-		outStr += string(prevSym)
+		builder.WriteRune(prevSym)
 	}
 
-	return outStr, nil
+	return builder.String(), nil
 }
