@@ -1,0 +1,36 @@
+{
+	"folders": [
+		{
+			"path": "hw01_hello_otus"
+		},
+		{
+			"path": "hw02_unpack_string"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.tcc": "cpp",
+			"ctime": "cpp",
+			"iomanip": "cpp",
+			"random": "cpp",
+			"cstdio": "cpp",
+			"numeric": "cpp",
+			"fstream": "cpp",
+			"istream": "cpp",
+			"ostream": "cpp",
+			"system_error": "cpp",
+			"typeinfo": "cpp",
+			"new": "cpp",
+			"array": "cpp",
+			"deque": "cpp",
+			"string": "cpp",
+			"unordered_map": "cpp",
+			"unordered_set": "cpp",
+			"vector": "cpp",
+			"string_view": "cpp",
+			"memory": "cpp",
+			"initializer_list": "cpp",
+			"utility": "cpp"
+		}
+	}
+}
