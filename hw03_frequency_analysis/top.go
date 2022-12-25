@@ -7,9 +7,12 @@ import (
 
 func Top10(text string) []string {
 	wordMap := map[string]int{}
-	wordArr := strings.Fields(text)
+	wordArr := strings.FieldsFunc(text, func(r rune) bool {
+		return strings.ContainsRune(" ,.:!?\n\t\"'`", r)
+	})
 	for _, word := range wordArr {
-		if word == "" {
+		word = strings.ToLower(strings.TrimSpace(word))
+		if word == "" || word == "-" {
 			continue
 		}
 		_, ok := wordMap[word]
