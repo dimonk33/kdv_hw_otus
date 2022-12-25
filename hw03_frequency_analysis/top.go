@@ -1,6 +1,49 @@
 package hw03frequencyanalysis
 
-func Top10(_ string) []string {
-	// Place your code here.
-	return nil
+import (
+	"sort"
+	"strings"
+)
+
+func Top10(text string) []string {
+	wordMap := map[string]int{}
+	wordArr := strings.Fields(text)
+	for _, word := range wordArr {
+		if word == "" {
+			continue
+		}
+		_, ok := wordMap[word]
+		if !ok {
+			wordMap[word] = 0
+		}
+		wordMap[word]++
+	}
+
+	type keyValue struct {
+		key   string
+		count int
+	}
+	sortedMap := make([]keyValue, len(wordMap))
+	i := 0
+	for k, v := range wordMap {
+		sortedMap[i] = keyValue{key: k, count: v}
+		i++
+	}
+
+	sort.Slice(sortedMap, func(i, j int) bool {
+		if sortedMap[i].count == sortedMap[j].count {
+			return sortedMap[i].key < sortedMap[j].key
+		}
+		return sortedMap[i].count > sortedMap[j].count
+	})
+
+	sortWords := make([]string, 0)
+	for _, v := range sortedMap {
+		sortWords = append(sortWords, v.key)
+		if len(sortWords) >= 10 {
+			break
+		}
+	}
+
+	return sortWords
 }
