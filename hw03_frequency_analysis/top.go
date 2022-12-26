@@ -15,10 +15,6 @@ func Top10(text string) []string {
 		if word == "" || word == "-" {
 			continue
 		}
-		_, ok := wordMap[word]
-		if !ok {
-			wordMap[word] = 0
-		}
 		wordMap[word]++
 	}
 
@@ -26,11 +22,9 @@ func Top10(text string) []string {
 		key   string
 		count int
 	}
-	sortedMap := make([]keyValue, len(wordMap))
-	i := 0
+	var sortedMap []keyValue
 	for k, v := range wordMap {
-		sortedMap[i] = keyValue{key: k, count: v}
-		i++
+		sortedMap = append(sortedMap, keyValue{key: k, count: v})
 	}
 
 	sort.Slice(sortedMap, func(i, j int) bool {
@@ -40,12 +34,16 @@ func Top10(text string) []string {
 		return sortedMap[i].count > sortedMap[j].count
 	})
 
-	sortWords := make([]string, 0)
-	for _, v := range sortedMap {
-		sortWords = append(sortWords, v.key)
-		if len(sortWords) >= 10 {
-			break
-		}
+	var sortWordCount int
+	if len(sortedMap) > 10 {
+		sortWordCount = 10
+	} else {
+		sortWordCount = len(sortedMap)
+	}
+
+	sortWords := make([]string, sortWordCount)
+	for i := 0; i < sortWordCount; i++ {
+		sortWords[i] = sortedMap[i].key
 	}
 
 	return sortWords
