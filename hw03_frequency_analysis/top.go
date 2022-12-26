@@ -22,7 +22,7 @@ func Top10(text string) []string {
 		key   string
 		count int
 	}
-	var sortedMap []keyValue
+	sortedMap := make([]keyValue, 0, len(wordMap))
 	for k, v := range wordMap {
 		sortedMap = append(sortedMap, keyValue{key: k, count: v})
 	}
