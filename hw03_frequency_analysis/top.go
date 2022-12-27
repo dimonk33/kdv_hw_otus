@@ -5,6 +5,14 @@ import (
 	"strings"
 )
 
+func getKeysArr(arr map[string]int) []string {
+	keys := make([]string, 0, len(arr))
+	for key := range arr {
+		keys = append(keys, key)
+	}
+	return keys
+}
+
 func Top10(text string) []string {
 	wordMap := map[string]int{}
 	wordArr := strings.FieldsFunc(text, func(r rune) bool {
@@ -18,33 +26,19 @@ func Top10(text string) []string {
 		wordMap[word]++
 	}
 
-	type keyValue struct {
-		key   string
-		count int
-	}
-	sortedMap := make([]keyValue, 0, len(wordMap))
-	for k, v := range wordMap {
-		sortedMap = append(sortedMap, keyValue{key: k, count: v})
-	}
+	keysArr := getKeysArr(wordMap)
 
-	sort.Slice(sortedMap, func(i, j int) bool {
-		if sortedMap[i].count == sortedMap[j].count {
-			return sortedMap[i].key < sortedMap[j].key
+	sort.Slice(keysArr, func(i, j int) bool {
+		if wordMap[keysArr[i]] == wordMap[keysArr[j]] {
+			return keysArr[i] < keysArr[j]
 		}
-		return sortedMap[i].count > sortedMap[j].count
+		return wordMap[keysArr[i]] > wordMap[keysArr[j]]
 	})
 
-	var sortWordCount int
-	if len(sortedMap) > 10 {
+	sortWordCount := len(wordMap)
+	if sortWordCount > 10 {
 		sortWordCount = 10
-	} else {
-		sortWordCount = len(sortedMap)
 	}
 
-	sortWords := make([]string, sortWordCount)
-	for i := 0; i < sortWordCount; i++ {
-		sortWords[i] = sortedMap[i].key
-	}
-
-	return sortWords
+	return keysArr[:sortWordCount]
 }
