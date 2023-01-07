@@ -1,11 +1,18 @@
 package hw04lrucache
 
+import "fmt"
+
 type Key string
 
 type Cache interface {
 	Set(key Key, value interface{}) bool
 	Get(key Key) (interface{}, bool)
 	Clear()
+}
+
+type cacheItem struct {
+	key   Key
+	value interface{}
 }
 
 type lruCache struct {
@@ -17,21 +24,21 @@ type lruCache struct {
 func (c lruCache) Set(key Key, value interface{}) bool {
 	item, ok := c.items[key]
 	if ok {
-		item.Value = value
+		item.Value = cacheItem{key: key, value: value}
 		c.queue.MoveToFront(item)
 		return true
 	}
 	if c.queue.Len() == c.capacity {
-		item = c.queue.Back()
-		for k, v := range c.items {
-			if v == item {
-				delete(c.items, k)
-				break
-			}
+		var itemValue cacheItem
+		itemValue, ok = c.queue.Back().Value.(cacheItem)
+		if !ok {
+			err := fmt.Errorf("cache is broken on element %v", c.queue.Back())
+			fmt.Println(err.Error())
 		}
-		c.queue.Remove(item)
+		delete(c.items, itemValue.key)
+		c.queue.Remove(c.queue.Back())
 	}
-	item = c.queue.PushFront(value)
+	item = c.queue.PushFront(cacheItem{key: key, value: value})
 	c.items[key] = item
 	return false
 }
@@ -43,7 +50,12 @@ func (c lruCache) Get(key Key) (interface{}, bool) {
 	}
 	c.queue.MoveToFront(item)
 
-	return item.Value, true
+	var itemValue cacheItem
+	itemValue, ok = item.Value.(cacheItem)
+	if !ok {
+		return nil, false
+	}
+	return itemValue.value, true
 }
 
 func (c lruCache) Clear() {
