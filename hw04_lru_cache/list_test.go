@@ -56,10 +56,8 @@ func TestList(t *testing.T) {
 		l.PushBack(2) // [1, 2]
 		require.Equal(t, 2, l.Len())
 
-		for i := l.Front(); i != nil; {
-			j := i
-			i = i.Next
-			l.Remove(j)
+		for i := l.Front(); i != nil; i = i.Next {
+			l.Remove(i)
 		}
 
 		require.Equal(t, 0, l.Len())

@@ -37,7 +37,6 @@ func (l *list) Back() *ListItem {
 func (l *list) PushFront(v interface{}) *ListItem {
 	item := ListItem{}
 	item.Value = v
-	item.Prev = nil
 	if l.frontItem == nil {
 		item.Next = nil
 		l.frontItem = &item
@@ -87,8 +86,6 @@ func (l *list) Remove(i *ListItem) {
 			i.Next.Prev = i.Prev
 		}
 	}
-
-	*i = ListItem{}
 	l.count--
 }
 
