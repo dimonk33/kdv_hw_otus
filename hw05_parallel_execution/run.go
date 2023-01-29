@@ -19,20 +19,37 @@ func Run(tasks []Task, n, m int) error {
 	wg.Add(n)
 
 	for i := 0; i < n; i++ {
-		go func(_m, _curTaskIdx, _errCount *int, _tasks []Task) {
-			for *_errCount < *_m && *_curTaskIdx < len(_tasks) {
+		go func(_curTaskIdx, _errCount *int) {
+			var task Task
+
+			for {
+				task = nil
 				muTask.Lock()
-				task := _tasks[*_curTaskIdx]
-				*_curTaskIdx++
+				if *_curTaskIdx < len(tasks) {
+					task = tasks[*_curTaskIdx]
+					*_curTaskIdx++
+				}
 				muTask.Unlock()
+				if task == nil {
+					break
+				}
+
 				if task() != nil {
 					muError.Lock()
 					*_errCount++
 					muError.Unlock()
 				}
+
+				muError.Lock()
+				count := *_errCount
+				muError.Unlock()
+
+				if count >= m {
+					break
+				}
 			}
 			wg.Done()
-		}(&m, &curTaskIdx, &errCount, tasks)
+		}(&curTaskIdx, &errCount)
 	}
 
 	wg.Wait()

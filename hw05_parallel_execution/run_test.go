@@ -50,8 +50,11 @@ func TestRun(t *testing.T) {
 			sumTime += taskSleep
 
 			tasks = append(tasks, func() error {
-				time.Sleep(taskSleep)
-				atomic.AddInt32(&runTasksCount, 1)
+				timer := time.NewTimer(taskSleep / 1000)
+				select {
+				case <-timer.C:
+					atomic.AddInt32(&runTasksCount, 1)
+				}
 				return nil
 			})
 		}
