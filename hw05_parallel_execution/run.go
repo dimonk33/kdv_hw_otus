@@ -11,6 +11,9 @@ type Task func() error
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
+	if n <= 0 || m <= 0 {
+		return errors.New("wrong initial parameters")
+	}
 	curTaskIdx := 0
 	errCount := 0
 	muTask := sync.Mutex{}
