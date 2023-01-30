@@ -37,17 +37,16 @@ func Run(tasks []Task, n, m int) error {
 					break
 				}
 
-				if task() != nil {
-					muError.Lock()
-					*_errCount++
-					muError.Unlock()
-				}
+				err := task()
 
 				muError.Lock()
-				count := *_errCount
+				if err != nil {
+					*_errCount++
+				}
+				exit := *_errCount >= m
 				muError.Unlock()
 
-				if count >= m {
+				if exit {
 					break
 				}
 			}
