@@ -14,45 +14,47 @@ func Run(tasks []Task, n, m int) error {
 	if n <= 0 || m <= 0 {
 		return errors.New("wrong initial parameters")
 	}
-	curTaskIdx := 0
 	errCount := 0
-	muTask := sync.Mutex{}
 	muError := sync.Mutex{}
+	chTask := make(chan Task)
 	wg := sync.WaitGroup{}
-	wg.Add(n)
+	wg.Add(n + 1)
 
 	for i := 0; i < n; i++ {
-		go func(_curTaskIdx, _errCount *int) {
-			var task Task
-
-			for {
-				task = nil
-				muTask.Lock()
-				if *_curTaskIdx < len(tasks) {
-					task = tasks[*_curTaskIdx]
-					*_curTaskIdx++
-				}
-				muTask.Unlock()
-				if task == nil {
-					break
-				}
-
-				err := task()
-
-				muError.Lock()
-				if err != nil {
+		go func(chT <-chan Task, _errCount *int) {
+			defer wg.Done()
+			for task := range chT {
+				if task() != nil {
+					muError.Lock()
 					*_errCount++
-				}
-				exit := *_errCount >= m
-				muError.Unlock()
-
-				if exit {
-					break
+					muError.Unlock()
 				}
 			}
-			wg.Done()
-		}(&curTaskIdx, &errCount)
+		}(chTask, &errCount)
 	}
+
+	go func(chT chan<- Task, _errCount *int) {
+		defer close(chT)
+		defer wg.Done()
+
+		for _, t := range tasks {
+			wait := true
+			for wait {
+				muError.Lock()
+				exit := *_errCount >= m
+				muError.Unlock()
+				if exit {
+					return
+				}
+
+				select {
+				case chT <- t:
+					wait = false
+				default:
+				}
+			}
+		}
+	}(chTask, &errCount)
 
 	wg.Wait()
 
