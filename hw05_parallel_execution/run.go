@@ -15,7 +15,7 @@ func Run(tasks []Task, n, m int) error {
 	if n <= 0 || m <= 0 {
 		return errors.New("wrong initial parameters")
 	}
-	var errCount int32 = 0
+	var errCount int32
 	chTask := make(chan Task)
 	wg := sync.WaitGroup{}
 	wg.Add(n)
@@ -32,7 +32,6 @@ func Run(tasks []Task, n, m int) error {
 	}
 
 	for _, t := range tasks {
-
 		if atomic.LoadInt32(&errCount) >= int32(m) {
 			break
 		}
