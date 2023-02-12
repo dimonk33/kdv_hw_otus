@@ -14,7 +14,7 @@ type (
 type Stage func(in In) (out Out)
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
-	var from = in
+	from := in
 	start := time.Now()
 	for i, stage := range stages {
 		inCh := make(Bi)
