@@ -10,7 +10,7 @@ import (
 var (
 	ErrFileNotExist = errors.New("file not exist")
 	ErrCreateFile   = errors.New("file create error")
-	//ErrUnsupportedFile       = errors.New("unsupported file")
+	// ErrUnsupportedFile       = errors.New("unsupported file")
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
 	ErrSeekFile              = errors.New("file seek error")
 	ErrCopyFile              = errors.New("file copy error")
