@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	"github.com/cheggaaa/pb/v3"
 )
 
 var (
-	ErrFileNotExist = errors.New("file not exist")
-	ErrCreateFile   = errors.New("file create error")
-	// ErrUnsupportedFile       = errors.New("unsupported file")
+	ErrFileNotExist          = errors.New("file not exist")
+	ErrCreateFile            = errors.New("file create error")
+	ErrUnsupportedFile       = errors.New("unsupported file")
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
 	ErrSeekFile              = errors.New("file seek error")
 	ErrCopyFile              = errors.New("file copy error")
@@ -29,8 +31,9 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	info, errSize := fileFrom.Stat()
 	fileSize := info.Size()
 	if errSize != nil {
-		return errSize
+		return ErrUnsupportedFile
 	}
+
 	if offset >= fileSize {
 		return ErrOffsetExceedsFileSize
 	}
@@ -50,7 +53,15 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	if errSeek != nil {
 		return ErrSeekFile
 	}
-	_, errCopy := io.CopyN(fileTo, fileFrom, copySize)
+
+	bar := pb.Full.Start64(copySize)
+	barReader := bar.NewProxyReader(fileFrom)
+
+	_, errCopy := io.CopyN(fileTo, barReader, copySize)
+
+	bar.Finish()
+	fmt.Println("")
+
 	if errCopy != nil {
 		return ErrCopyFile
 	}
@@ -59,7 +70,6 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 }
 
 func closeFile(file *os.File) {
-
 	if err := file.Close(); err != nil {
 		fmt.Printf("%v", err)
 	}
