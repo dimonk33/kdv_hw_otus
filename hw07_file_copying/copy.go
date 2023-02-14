@@ -59,8 +59,8 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 }
 
 func closeFile(file *os.File) {
-	err := file.Close()
-	if err != nil {
+
+	if err := file.Close(); err != nil {
 		fmt.Printf("%v", err)
 	}
 }
