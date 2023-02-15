@@ -12,7 +12,7 @@ func TestCopy(t *testing.T) {
 	output := t.TempDir() + "/out.txt"
 
 	t.Run("identical in and output files", func(t *testing.T) {
-		res := Copy(input, input, 100000, 0)
+		res := Copy(input, "testdata/../"+input, 100000, 0)
 		require.Error(t, res)
 	})
 

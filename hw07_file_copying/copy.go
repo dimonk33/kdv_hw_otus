@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 
 	"github.com/cheggaaa/pb/v3"
 )
@@ -21,6 +22,9 @@ var (
 )
 
 func Copy(fromPath, toPath string, offset, limit int64) error {
+	fromPath = path.Clean(fromPath)
+	toPath = path.Clean(toPath)
+
 	if fromPath == toPath {
 		return ErrPathFiles
 	}
