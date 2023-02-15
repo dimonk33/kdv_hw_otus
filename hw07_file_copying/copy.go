@@ -16,9 +16,19 @@ var (
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
 	ErrSeekFile              = errors.New("file seek error")
 	ErrCopyFile              = errors.New("file copy error")
+	ErrPathFiles             = errors.New("path for files error")
+	ErrParams                = errors.New("limit or offset error")
 )
 
 func Copy(fromPath, toPath string, offset, limit int64) error {
+	if fromPath == toPath {
+		return ErrPathFiles
+	}
+
+	if offset < 0 || limit < 0 {
+		return ErrParams
+	}
+
 	fileFrom, errFrom := os.Open(fromPath)
 	if errFrom != nil {
 		if os.IsNotExist(errFrom) {
@@ -49,7 +59,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	if limit > 0 && limit < copySize {
 		copySize = limit
 	}
-	_, errSeek := fileFrom.Seek(offset, 0)
+	_, errSeek := fileFrom.Seek(offset, io.SeekStart)
 	if errSeek != nil {
 		return ErrSeekFile
 	}
