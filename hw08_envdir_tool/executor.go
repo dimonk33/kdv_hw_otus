@@ -21,9 +21,8 @@ func execCmd(cmd string, args []string) int {
 		if ok {
 			log.Println(err)
 			return exitErr.ExitCode()
-		} else {
-			log.Fatal(err)
 		}
+		log.Fatal(err)
 	}
 	return 0
 }
