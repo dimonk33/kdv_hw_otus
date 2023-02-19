@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"os"
 	"os/exec"
@@ -17,9 +18,8 @@ func execCmd(cmd string, args []string) int {
 	command := exec.Command(cmd, args...)
 	command.Stdout = os.Stdout
 	if err := command.Run(); err != nil {
-		exitErr, ok := err.(*exec.ExitError)
-		if ok {
-			log.Println(err)
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
 			return exitErr.ExitCode()
 		}
 		log.Fatal(err)
