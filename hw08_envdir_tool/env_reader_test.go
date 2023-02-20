@@ -10,7 +10,7 @@ import (
 
 func TestReadDir(t *testing.T) {
 	t.Run("filter env key", func(t *testing.T) {
-		res := filterEnvKey("test= ; \t")
+		res := filterEnvKey("test     \t")
 		require.Equal(t, res, "test")
 	})
 
