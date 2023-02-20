@@ -25,6 +25,7 @@ func TestRunCmd(t *testing.T) {
 		_, err2 := os.LookupEnv("TEST2")
 		require.False(t, err2)
 	})
+
 	t.Run("exec cmd", func(t *testing.T) {
 		res := execCmd("bash", []string{"-c", "echo", "1"})
 		require.Equal(t, 0, res)

@@ -31,18 +31,13 @@ func execCmd(cmd string, args []string) int {
 
 func setEnvironment(env Environment) {
 	for key, value := range env {
-		if _, ok := os.LookupEnv(key); ok {
-			if value.NeedRemove {
-				err := os.Unsetenv(key)
-				if err != nil {
-					log.Println(err)
-				}
-				continue
-			}
+		err := os.Unsetenv(key)
+		if err != nil {
+			log.Println(err)
 		}
 
 		if !value.NeedRemove {
-			err := os.Setenv(key, value.Value)
+			err = os.Setenv(key, value.Value)
 			if err != nil {
 				log.Println(err)
 			}

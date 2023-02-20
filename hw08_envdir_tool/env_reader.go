@@ -31,7 +31,9 @@ func ReadDir(dir string) (Environment, error) {
 		if errInfo != nil {
 			continue
 		}
-
+		if strings.ContainsRune(file.Name(), '=') {
+			continue
+		}
 		key := filterEnvKey(file.Name())
 		if info.Size() == 0 {
 			filesEnv[key] = EnvValue{Value: "", NeedRemove: true}
@@ -48,7 +50,7 @@ func ReadDir(dir string) (Environment, error) {
 }
 
 func filterEnvKey(key string) string {
-	return strings.TrimRight(key, "=; \t")
+	return strings.TrimRight(key, " \t")
 }
 
 func filterEnvValue(value string) string {
