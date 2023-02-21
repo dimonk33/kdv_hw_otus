@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"syscall"
 )
 
 // RunCmd runs a command + arguments (cmd) with environment variables from env.
@@ -26,7 +27,9 @@ func execCmd(cmd string, args []string) int {
 		}
 		log.Fatal(err)
 	}
-	return 0
+
+	ws := command.ProcessState.Sys().(syscall.WaitStatus)
+	return ws.ExitStatus()
 }
 
 func setEnvironment(env Environment) {

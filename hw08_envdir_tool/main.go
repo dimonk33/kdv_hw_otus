@@ -11,5 +11,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	RunCmd(args[2:], envDir)
+	os.Exit(RunCmd(args[2:], envDir))
 }
