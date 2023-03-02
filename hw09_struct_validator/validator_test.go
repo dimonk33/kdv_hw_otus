@@ -2,8 +2,11 @@ package hw09structvalidator
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type UserRole string
@@ -42,10 +45,54 @@ func TestValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			// Place your code here.
+			User{
+				ID:     "1",
+				Name:   "test",
+				Age:    1,
+				Email:  "test@test.ru",
+				Role:   "test",
+				Phones: []string{"11111111111"},
+				meta:   json.RawMessage(""),
+			},
+			ValidationErrors{
+				ValidationError{"ID", ErrValidateLenCond},
+				ValidationError{"Name", ErrNoTags},
+				ValidationError{"Age", ErrValidateMinCond},
+				ValidationError{"Role", ErrValidateArrayCond},
+				ValidationError{"meta", ErrNoTags},
+			},
 		},
-		// ...
-		// Place your code here.
+		{
+			1,
+			ErrNotStruct,
+		},
+		{
+			App{
+				Version: "12345",
+			},
+			ValidationErrors{},
+		},
+		{
+			Token{
+				Header:    []byte{1, 2},
+				Payload:   []byte{3, 4},
+				Signature: []byte{5, 6},
+			},
+			ValidationErrors{
+				ValidationError{"Header", ErrNoTags},
+				ValidationError{"Payload", ErrNoTags},
+				ValidationError{"Signature", ErrNoTags},
+			},
+		},
+		{
+			Response{
+				Code: 200,
+				Body: "",
+			},
+			ValidationErrors{
+				ValidationError{"Body", ErrNoValidTag},
+			},
+		},
 	}
 
 	for i, tt := range tests {
@@ -53,8 +100,37 @@ func TestValidate(t *testing.T) {
 			tt := tt
 			t.Parallel()
 
-			// Place your code here.
-			_ = tt
+			err := Validate(tt.in)
+
+			var validationErrors, expectedErrors ValidationErrors
+			if errors.As(err, &validationErrors) && errors.As(tt.expectedErr, &expectedErrors) {
+				for i, e := range validationErrors {
+					res := errors.Is(e.Err, (expectedErrors)[i].Err)
+					require.True(t, res)
+				}
+			} else {
+				require.Equal(t, tt.expectedErr, err)
+			}
 		})
 	}
+
+	t.Run("int validate", func(t *testing.T) {
+		conditionStr := "in:1,10,100|min:0|max:99"
+		err := validateInt(1, conditionStr)
+		require.Nil(t, err)
+		err = validateInt(-1, conditionStr)
+		require.NotNil(t, err)
+		err = validateInt(100, conditionStr)
+		require.NotNil(t, err)
+	})
+
+	t.Run("string validate 1", func(t *testing.T) {
+		conditionStr := "in:test1,test_2,test_55|len:6|regexp:^[[:alpha:]]{4}_\\d{1,}$"
+		err := validateString("test_2", conditionStr)
+		require.Nil(t, err)
+		err = validateString("test1", conditionStr)
+		require.NotNil(t, err)
+		err = validateString("test_55", conditionStr)
+		require.NotNil(t, err)
+	})
 }
