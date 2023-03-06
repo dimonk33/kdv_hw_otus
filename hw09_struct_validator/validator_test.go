@@ -56,10 +56,8 @@ func TestValidate(t *testing.T) {
 			},
 			ValidationErrors{
 				ValidationError{"ID", ErrValidateLenCond},
-				ValidationError{"Name", ErrNoTags},
 				ValidationError{"Age", ErrValidateMinCond},
 				ValidationError{"Role", ErrValidateArrayCond},
-				ValidationError{"meta", ErrNoTags},
 			},
 		},
 		{
@@ -78,20 +76,14 @@ func TestValidate(t *testing.T) {
 				Payload:   []byte{3, 4},
 				Signature: []byte{5, 6},
 			},
-			ValidationErrors{
-				ValidationError{"Header", ErrNoTags},
-				ValidationError{"Payload", ErrNoTags},
-				ValidationError{"Signature", ErrNoTags},
-			},
+			ValidationErrors{},
 		},
 		{
 			Response{
 				Code: 200,
 				Body: "",
 			},
-			ValidationErrors{
-				ValidationError{"Body", ErrNoValidTag},
-			},
+			ValidationErrors{},
 		},
 	}
 

@@ -2,7 +2,6 @@ package hw09structvalidator
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -13,14 +12,13 @@ import (
 
 var (
 	ErrNotStruct          = errors.New("variable not a struct")
-	ErrNoTags             = errors.New("no Tags. Skip field")
-	ErrNoValidTag         = errors.New("no Tag validate. Skip field")
 	ErrNotIntSlice        = errors.New("error get []int")
 	ErrNotStringSlice     = errors.New("error get []string")
 	ErrWrongMinCond       = errors.New("error int min condition")
 	ErrWrongMaxCond       = errors.New("error int max condition")
 	ErrWrongArrayCond     = errors.New("error array condition")
 	ErrWrongLenCond       = errors.New("error string len condition")
+	ErrWrongType          = errors.New("error not support field")
 	ErrValidateMinCond    = errors.New("value < min")
 	ErrValidateMaxCond    = errors.New("value > max")
 	ErrValidateArrayCond  = errors.New("value not in array condition")
@@ -43,16 +41,22 @@ type ValidationError struct {
 
 type ValidationErrors []ValidationError
 
+func (v ValidationError) Error() string {
+	return v.Err.Error()
+}
+
 func (v ValidationErrors) Error() string {
-	var errMerge string
+	builder := strings.Builder{}
 	for i, e := range v {
-		errMerge += strconv.Itoa(i+1) + ") " + e.Field + ":" + e.Err.Error() + "\n"
+		builder.WriteString(strconv.Itoa(i+1) + ") " + e.Field + ":" + e.Err.Error() + "\n")
 	}
-	return errMerge
+	return builder.String()
 }
 
 func Validate(v interface{}) error {
 	outErrors := ValidationErrors{}
+	var exit bool
+	var err error
 	types := reflect.TypeOf(v)
 	values := reflect.ValueOf(v)
 	if types.Kind().String() != "struct" {
@@ -63,81 +67,39 @@ func Validate(v interface{}) error {
 		varType := types.Field(i).Type
 		varTag := types.Field(i).Tag
 		varValue := values.Field(i)
-		fmt.Printf("%v %v %v %v\n", varName, varType, varTag, varValue)
 
-		if len(varTag) == 0 {
-			err := ValidationError{
-				Field: varName,
-				Err:   ErrNoTags,
-			}
-			outErrors = append(outErrors, err)
+		if !varValue.CanSet() || len(varTag) == 0 {
 			continue
 		}
+
 		validateCondition, ok := varTag.Lookup("validate")
 		if !ok {
-			err := ValidationError{
-				Field: varName,
-				Err:   ErrNoValidTag,
-			}
-			outErrors = append(outErrors, err)
 			continue
 		}
 
-		switch varType.Kind().String() {
-		case "int":
-			err := validateInt(varValue.Int(), validateCondition)
-			if err != nil {
-				outErrors = append(outErrors, ValidationError{
-					Field: varName,
-					Err:   fmt.Errorf(varType.Kind().String()+"validate: %w", err),
-				})
-			}
-		case "[]int":
-			slice, ok := varValue.Interface().([]int)
-			if !ok {
-				err := ValidationError{
-					Field: varName,
-					Err:   ErrNotIntSlice,
-				}
-				outErrors = append(outErrors, err)
-			}
-			err := validateIntSlice(slice, validateCondition)
-			if err != nil {
-				outErrors = append(outErrors, ValidationError{
-					Field: varName,
-					Err:   fmt.Errorf(varType.Kind().String()+"validate: %w", err),
-				})
-			}
-		case "string":
-			err := validateString(varValue.String(), validateCondition)
-			if err != nil {
-				outErrors = append(outErrors, ValidationError{
-					Field: varName,
-					Err:   fmt.Errorf(varType.Kind().String()+"validate: %w", err),
-				})
-			}
-		case "[]string":
-			slice, ok := varValue.Interface().([]string)
-			if !ok {
-				outErrors = append(outErrors, ValidationError{
-					Field: varName,
-					Err:   ErrNotStringSlice,
-				})
-			}
-			err := validateStringSlice(slice, validateCondition)
-			if err != nil {
-				outErrors = append(outErrors, ValidationError{
-					Field: varName,
-					Err:   fmt.Errorf(varType.Kind().String()+"validate: %w", err),
-				})
-			}
+		switch varType.Kind() {
+		case reflect.Int, reflect.Int32, reflect.Int8, reflect.Int64, reflect.Int16,
+			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			err = validateInt(varValue.Int(), validateCondition)
+			outErrors, exit = addValidateError(varName, err, outErrors)
+		case reflect.String:
+			err = validateString(varValue.String(), validateCondition)
+			outErrors, exit = addValidateError(varName, err, outErrors)
+		case reflect.Slice:
+			err = validateSlice(varType, varValue, validateCondition)
+			outErrors, exit = addValidateError(varName, err, outErrors)
+		default:
+			return ErrWrongType
+		}
+
+		if exit {
+			return err
 		}
 	}
 	return outErrors
 }
 
 func validateInt(value int64, conditionStr string) error {
-	fmt.Printf("validate int: %d %v\n", value, conditionStr)
 	conditions := strings.Split(conditionStr, "|")
 	for _, condition := range conditions {
 		switch {
@@ -162,15 +124,18 @@ func validateInt(value int64, conditionStr string) error {
 		case strings.Contains(condition, tagIn):
 			numArrStr := strings.ReplaceAll(condition, tagIn, "")
 			numStrArr := strings.Split(numArrStr, ",")
-			var numArr []int
+			isFind := false
 			for _, numStr := range numStrArr {
 				num, err := strconv.Atoi(numStr)
 				if err != nil {
 					return ErrWrongArrayCond
 				}
-				numArr = append(numArr, num)
+				if value == int64(num) {
+					isFind = true
+					break
+				}
 			}
-			if !slices.Contains(numArr, int(value)) {
+			if !isFind {
 				return ErrValidateArrayCond
 			}
 		}
@@ -179,18 +144,7 @@ func validateInt(value int64, conditionStr string) error {
 	return nil
 }
 
-func validateIntSlice(value []int, conditionStr string) error {
-	fmt.Printf("validate []int: %v %v\n", value, conditionStr)
-	for _, v := range value {
-		if err := validateInt(int64(v), conditionStr); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func validateString(value string, conditionStr string) error {
-	fmt.Printf("validate string: %s %v\n", value, conditionStr)
 	conditions := strings.Split(conditionStr, "|")
 
 	for _, condition := range conditions {
@@ -222,12 +176,64 @@ func validateString(value string, conditionStr string) error {
 	return nil
 }
 
+func validateSlice(
+	varType reflect.Type,
+	varValue reflect.Value,
+	validateCondition string,
+) error {
+	switch varType.Elem().Kind() {
+	case reflect.Int:
+		slice, ok := varValue.Interface().([]int)
+		if !ok {
+			return ErrNotIntSlice
+		}
+		err := validateIntSlice(slice, validateCondition)
+		if err != nil {
+			return err
+		}
+	case reflect.String:
+		slice, ok := varValue.Interface().([]string)
+		if !ok {
+			return ErrNotStringSlice
+		}
+		err := validateStringSlice(slice, validateCondition)
+		if err != nil {
+			return err
+		}
+	default:
+		return ErrWrongType
+	}
+	return nil
+}
+
+func validateIntSlice(value []int, conditionStr string) error {
+	for _, v := range value {
+		if err := validateInt(int64(v), conditionStr); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func validateStringSlice(value []string, conditionStr string) error {
-	fmt.Printf("validate []string: %v %v\n", value, conditionStr)
 	for _, v := range value {
 		if err := validateString(v, conditionStr); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func addValidateError(varName string, err error, outErrors ValidationErrors) (ValidationErrors, bool) {
+	if !(errors.Is(err, ErrWrongMinCond) ||
+		errors.Is(err, ErrWrongMaxCond) ||
+		errors.Is(err, ErrWrongArrayCond) ||
+		errors.Is(err, ErrWrongLenCond)) {
+		outErrors = append(outErrors, ValidationError{
+			Field: varName,
+			Err:   err,
+		})
+		return outErrors, false
+	}
+	return outErrors, true
 }
