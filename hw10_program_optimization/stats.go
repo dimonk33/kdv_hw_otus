@@ -24,6 +24,7 @@ type DomainStat map[string]int
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 	result := make(DomainStat)
 	chUser := make(chan User, 1000)
+	var errUser error
 
 	re, err := regexp.Compile("\\." + domain)
 	if err != nil {
@@ -33,21 +34,26 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
-	go getUsers(r, chUser)
+	go getUsers(r, chUser, &errUser)
 	go countDomains(chUser, &result, re, &wg)
 
 	wg.Wait()
 
+	if errUser != nil {
+		return nil, errUser
+	}
+
 	return result, nil
 }
 
-func getUsers(r io.Reader, ch chan User) {
+func getUsers(r io.Reader, ch chan User, errOut *error) {
 	defer close(ch)
 	fileScanner := bufio.NewScanner(r)
 	fileScanner.Split(bufio.ScanLines)
 	var user User
 	for fileScanner.Scan() {
 		if err := json.Unmarshal(fileScanner.Bytes(), &user); err != nil {
+			*errOut = err
 			return
 		}
 		ch <- user
