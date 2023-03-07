@@ -1,12 +1,12 @@
 package hw10programoptimization
 
 import (
-	"encoding/json"
-	"fmt"
+	"bufio"
+	"github.com/goccy/go-json"
 	"io"
-	"io/ioutil"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 type User struct {
@@ -22,46 +22,46 @@ type User struct {
 type DomainStat map[string]int
 
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
-	u, err := getUsers(r)
+	result := make(DomainStat)
+	chUser := make(chan User, 1000)
+
+	re, err := regexp.Compile("\\." + domain)
 	if err != nil {
-		return nil, fmt.Errorf("get users error: %w", err)
+		return nil, err
 	}
-	return countDomains(u, domain)
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	go getUsers(r, chUser)
+	go countDomains(chUser, &result, re, &wg)
+
+	wg.Wait()
+
+	return result, nil
 }
 
-type users [100_000]User
-
-func getUsers(r io.Reader) (result users, err error) {
-	content, err := ioutil.ReadAll(r)
-	if err != nil {
-		return
-	}
-
-	lines := strings.Split(string(content), "\n")
-	for i, line := range lines {
-		var user User
-		if err = json.Unmarshal([]byte(line), &user); err != nil {
+func getUsers(r io.Reader, ch chan User) {
+	defer close(ch)
+	fileScanner := bufio.NewScanner(r)
+	fileScanner.Split(bufio.ScanLines)
+	var user User
+	for fileScanner.Scan() {
+		if err := json.Unmarshal(fileScanner.Bytes(), &user); err != nil {
 			return
 		}
-		result[i] = user
+		ch <- user
 	}
-	return
 }
 
-func countDomains(u users, domain string) (DomainStat, error) {
-	result := make(DomainStat)
-
-	for _, user := range u {
-		matched, err := regexp.Match("\\."+domain, []byte(user.Email))
-		if err != nil {
-			return nil, err
-		}
-
+func countDomains(ch chan User, result *DomainStat, re *regexp.Regexp, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for user := range ch {
+		matched := re.Match([]byte(user.Email))
 		if matched {
-			num := result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]
+			num := (*result)[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]
 			num++
-			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = num
+			(*result)[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = num
 		}
 	}
-	return result, nil
 }
