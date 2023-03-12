@@ -40,10 +40,8 @@ func TestGetDomainStat(t *testing.T) {
 
 	t.Run("bad json", func(t *testing.T) {
 		data = `{"Id":1,"Name":"Howard Mendoza","Username":"0Oliver","Email":"aliquid_qui_ea@Browsedrive.gov","Phone":"6-866-899-36-79","Password":"InAQJvsq","Address":"Blackbird Place 25"`
-		ch := make(chan User, 1)
-		var err error
-		getUsers(bytes.NewBufferString(data), ch, &err)
-		<-ch
+		result, err := GetDomainStat(bytes.NewBufferString(data), "gov")
 		require.NotNil(t, err)
+		require.Equal(t, DomainStat{}, result)
 	})
 }
