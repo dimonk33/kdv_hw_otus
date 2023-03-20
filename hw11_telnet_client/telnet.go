@@ -42,6 +42,10 @@ func (c *Client) Connect() error {
 }
 
 func (c *Client) Close() error {
+	if err := c.in.Close(); err != nil {
+		println(err)
+	}
+
 	if c.conn == nil {
 		return nil
 	}

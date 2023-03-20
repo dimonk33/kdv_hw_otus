@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"net"
 	"os"
 	"os/signal"
@@ -29,7 +28,6 @@ func main() {
 		}
 	}
 	address := net.JoinHostPort(host, port)
-	fmt.Printf("%v:%v timeout=%v\n", host, port, argTimeout)
 	timeout, err := time.ParseDuration(argTimeout)
 	if err != nil {
 		println("неверное значение таймаута: %w", err)

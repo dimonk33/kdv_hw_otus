@@ -3,11 +3,11 @@ set -xeuo pipefail
 
 go build -o go-telnet
 
-(echo -e "Hello\nFrom\nNC\n" && cat 2>/dev/null) | nc -l localhost 4242 >/tmp/nc.out &
+(echo -e "Hello\nFrom\nNC\n" && cat 2>/dev/null) | "/c/Work/Utilities/Nmap/ncat.exe" -l localhost 4242 >/d/kuzmindv/temp/nc.out &
 NC_PID=$!
 
 sleep 1
-(echo -e "I\nam\nTELNET client\n" && cat 2>/dev/null) | ./go-telnet --timeout=5s localhost 4242 >/tmp/telnet.out &
+(echo -e "I\nam\nTELNET client\n" && cat 2>/dev/null) | ./go-telnet --timeout=5s localhost 4242 >/d/kuzmindv/temp/telnet.out &
 TL_PID=$!
 
 sleep 5
@@ -23,12 +23,12 @@ function fileEquals() {
 expected_nc_out='I
 am
 TELNET client'
-fileEquals /tmp/nc.out "${expected_nc_out}"
+fileEquals /d/kuzmindv/temp/nc.out "${expected_nc_out}"
 
 expected_telnet_out='Hello
 From
 NC'
-fileEquals /tmp/telnet.out "${expected_telnet_out}"
+fileEquals /d/kuzmindv/temp/telnet.out "${expected_telnet_out}"
 
 rm -f go-telnet
 echo "PASS"
