@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
+	"fmt"
+	"io"
 	"net"
 	"os"
 	"os/signal"
-	"sync"
-	"syscall"
 	"time"
 )
 
@@ -38,13 +39,11 @@ func main() {
 	if err = client.Connect(); err != nil {
 		println("%w", err)
 	}
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGQUIT)
+
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer exit(client, cancel)
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
 	go func() {
-		defer wg.Done()
 	OUTER:
 		for {
 			select {
@@ -52,6 +51,7 @@ func main() {
 				break OUTER
 			default:
 				if err := client.Send(); err != nil {
+					printExitMessage(err)
 					break OUTER
 				}
 			}
@@ -60,7 +60,6 @@ func main() {
 	}()
 
 	go func() {
-		defer wg.Done()
 	OUTER:
 		for {
 			select {
@@ -75,12 +74,18 @@ func main() {
 		cancel()
 	}()
 
-	wg.Wait()
+	<-ctx.Done()
 }
 
 func exit(client TelnetClient, cancel context.CancelFunc) {
 	cancel()
 	if err := client.Close(); err != nil {
 		println(err)
+	}
+}
+
+func printExitMessage(err error) {
+	if errors.Is(err, io.EOF) {
+		fmt.Printf("Выход из программы ...%s", err)
 	}
 }
