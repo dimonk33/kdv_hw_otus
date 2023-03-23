@@ -17,25 +17,10 @@ func init() {
 }
 
 func main() {
-	flag.Parse()
-	for i, val := range flag.Args() {
-		switch i {
-		case 0:
-			host = val
-		case 1:
-			port = val
-		}
-	}
-	address := net.JoinHostPort(host, port)
-	timeout, err := time.ParseDuration(argTimeout)
+	client, err := start()
 	if err != nil {
-		println("неверное значение таймаута: %w", err)
+		fmt.Printf("%s\n", err)
 		os.Exit(1)
-	}
-
-	client := NewTelnetClient(address, timeout, os.Stdin, os.Stdout)
-	if err = client.Connect(); err != nil {
-		println("%w", err)
 	}
 
 	signalChanel := make(chan os.Signal, 1)
@@ -72,6 +57,30 @@ func main() {
 		processClient(client.Receive, exitChan)
 	}()
 	<-exitChan
+}
+
+func start() (TelnetClient, error) {
+	flag.Parse()
+	for i, val := range flag.Args() {
+		switch i {
+		case 0:
+			host = val
+		case 1:
+			port = val
+		}
+	}
+	address := net.JoinHostPort(host, port)
+	timeout, err := time.ParseDuration(argTimeout)
+	if err != nil {
+		return nil, err
+	}
+
+	client := NewTelnetClient(address, timeout, os.Stdin, os.Stdout)
+	if err = client.Connect(); err != nil {
+		return nil, err
+	}
+
+	return client, nil
 }
 
 func processClient(processor func() error, exitCh chan int) {
