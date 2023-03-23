@@ -1,14 +1,12 @@
 package main
 
 import (
-	"context"
-	"errors"
 	"flag"
 	"fmt"
-	"io"
 	"net"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -40,52 +38,53 @@ func main() {
 		println("%w", err)
 	}
 
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer exit(client, cancel)
+	signalChanel := make(chan os.Signal, 1)
+	signal.Notify(signalChanel,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+	)
+	exitChan := make(chan int)
 
-	go func() {
-	OUTER:
-		for {
-			select {
-			case <-ctx.Done():
-				break OUTER
-			default:
-				if err := client.Send(); err != nil {
-					printExitMessage(err)
-					break OUTER
-				}
-			}
+	defer func() {
+		if err := client.Close(); err != nil {
+			println(err)
 		}
-		cancel()
+		close(signalChanel)
 	}()
 
 	go func() {
-	OUTER:
-		for {
-			select {
-			case <-ctx.Done():
-				break OUTER
-			default:
-				if err := client.Receive(); err != nil {
-					break OUTER
-				}
-			}
+		s, ok := <-signalChanel
+		if !ok {
+			return
 		}
-		cancel()
+		if s == syscall.SIGQUIT {
+			fmt.Println(".....EOF")
+		}
+		exitChan <- 0
 	}()
 
-	<-ctx.Done()
+	go func() {
+		processClient(client.Send, exitChan)
+	}()
+
+	go func() {
+		processClient(client.Receive, exitChan)
+	}()
+	<-exitChan
 }
 
-func exit(client TelnetClient, cancel context.CancelFunc) {
-	cancel()
-	if err := client.Close(); err != nil {
-		println(err)
-	}
-}
-
-func printExitMessage(err error) {
-	if errors.Is(err, io.EOF) {
-		fmt.Printf("Выход из программы ...%s", err)
+func processClient(processor func() error, exitCh chan int) {
+	for {
+		select {
+		case <-exitCh:
+			return
+		default:
+			if err := processor(); err != nil {
+				time.Sleep(100 * time.Millisecond)
+				exitCh <- 2
+				return
+			}
+		}
 	}
 }
