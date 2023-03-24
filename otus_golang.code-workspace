@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "hw02_unpack_string"
+		},
+		{
+			"path": "hw11_telnet_client"
 		}
 	],
 	"settings": {
