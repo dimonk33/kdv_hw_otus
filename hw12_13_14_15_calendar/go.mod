@@ -2,7 +2,10 @@ module github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar
 
 go 1.19
 
-require github.com/spf13/viper v1.15.0
+require (
+	github.com/jmoiron/sqlx v1.3.5
+	github.com/spf13/viper v1.15.0
+)
 
 require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect

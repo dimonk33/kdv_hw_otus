@@ -1,5 +1,13 @@
 [logger]
 level = "INFO"
 
-# TODO
-# ...
+[db]
+type = "in-memory"
+host = "localhost"
+port = 5432
+user = "postgres"
+password = ""
+
+[http]
+host = "localhost"
+port = 8080

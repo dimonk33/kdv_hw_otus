@@ -1,25 +1,32 @@
 package main
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+	"strconv"
+)
 
 // Config При желании конфигурацию можно вынести в internal/config.
 // Организация конфига в main принуждает нас сужать API компонентов, использовать
 // при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
 type Config struct {
-	Logger LoggerConf `yaml:"logger"`
-	pg     Postgres   `yaml:"postgresql"`
-	// TODO
+	Logger LoggerConf `mapstructure:"logger"`
+	pg     Postgres   `mapstructure:"db"`
+	server Server     `mapstructure:"server"`
 }
 
 type LoggerConf struct {
 	Level string
-	// TODO
 }
 
 type Postgres struct {
-	Host     string
-	User     string
-	Password string
+	Host     string `mapstructure:"host"`
+	User     string `mapstructure:"user"`
+	Password string `mapstructure:"password"`
+}
+
+type Server struct {
+	host string `mapstructure:"host"`
+	port int    `mapstructure:"port"`
 }
 
 func NewConfig() (Config, error) {
@@ -36,4 +43,12 @@ func (c *Config) init() error {
 		return err
 	}
 	return nil
+}
+
+func (c *Config) GetDbUrl() string {
+	return "postgres://" + c.pg.User + ":" + c.pg.Password + "@" + c.pg.Host
+}
+
+func (c *Config) GetServerConnect() string {
+	return c.server.host + ":" + strconv.Itoa(c.server.port)
 }

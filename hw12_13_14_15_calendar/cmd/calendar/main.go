@@ -18,7 +18,7 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.yaml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
 }
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
 	storage := memorystorage.New()
 	calendar := app.New(logg, storage)
 
-	server := internalhttp.NewServer(logg, calendar)
+	server := internalhttp.NewServer(config.GetServerConnect(), logg, calendar)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)

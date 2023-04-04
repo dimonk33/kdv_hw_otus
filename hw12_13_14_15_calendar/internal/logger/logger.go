@@ -12,7 +12,7 @@ const (
 	levelDebug = "debug"
 )
 
-type Logger struct { // TODO
+type Logger struct {
 	level      string
 	errorLog   *log.Logger
 	warningLog *log.Logger
