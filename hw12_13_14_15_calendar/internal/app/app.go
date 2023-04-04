@@ -45,10 +45,10 @@ func (a *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	writeBytes, err := io.WriteString(w, "Hello, HTTP!\n")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - " + err.Error()))
+		_, _ = w.Write([]byte("500 - " + err.Error()))
 	}
 	if writeBytes == 0 {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - Данные не отправлены"))
+		_, _ = w.Write([]byte("500 - Данные не отправлены"))
 	}
 }
