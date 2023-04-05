@@ -32,6 +32,6 @@ lint: install-lint-deps
 	golangci-lint run ./...
 
 migrate:
-	goose postgres "user=postgres dbname=hw sslmode=disable" up
+	cd migrations || goose postgres "user=user password=password  dbname=hw sslmode=disable" up || cd ..
 
 .PHONY: build run build-img run-img version test lint

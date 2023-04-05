@@ -5,6 +5,12 @@ CREATE TABLE users(
     name varchar(255),
     PRIMARY KEY(id)
 );
+
+INSERT INTO
+    users (id, name) OVERRIDING USER VALUE
+VALUES
+    (1, 'admin');
+
 -- +goose StatementEnd
 
 -- +goose Down

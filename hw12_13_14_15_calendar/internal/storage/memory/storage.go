@@ -14,7 +14,8 @@ type Storage struct {
 }
 
 func New() *Storage {
-	return &Storage{}
+	db := make(map[int64]storage.Event, 1)
+	return &Storage{db: db}
 }
 
 func (s *Storage) Create(data storage.Event) (int64, error) {
@@ -22,6 +23,7 @@ func (s *Storage) Create(data storage.Event) (int64, error) {
 	curId := s.id
 	s.id++
 	s.mu.Unlock()
+	data.ID = curId
 	s.db[curId] = data
 
 	return curId, nil
