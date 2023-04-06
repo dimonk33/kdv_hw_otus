@@ -11,9 +11,9 @@ import (
 
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/app"
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/logger"
-	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/server/http"
-	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage/memory"
-	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage/sql"
+	internalhttp "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/server/http"
+	memorystorage "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
