@@ -2,13 +2,12 @@ package internalhttp
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 )
 
 type Server struct {
-	log    Logger
+	logger Logger
 	server *http.Server
 }
 
@@ -21,43 +20,37 @@ type Application interface {
 }
 
 func NewServer(addr string, logger Logger, app Application) *Server {
-	s := &Server{
-		log: logger,
-	}
-
 	router := http.NewServeMux()
 	router.HandleFunc("/hello", app.HelloHandler)
 
+	m := Middleware{
+		logger: logger,
+	}
+
+	s := &Server{
+		logger: logger,
+	}
 	s.server = &http.Server{
-		Addr:         addr,
-		Handler:      s.LogHandler(router),
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
+		Addr:              addr,
+		Handler:           m.logging(router),
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 	return s
 }
 
 func (s *Server) Start(ctx context.Context) error {
-	return s.server.ListenAndServe()
+	if err := s.server.ListenAndServe(); err != nil {
+		return err
+	}
+	s.logger.Info("Http сервер запущен")
+
+	<-ctx.Done()
+
+	return ctx.Err()
 }
 
 func (s *Server) Stop(ctx context.Context) error {
-	return nil
-}
-
-func (s *Server) LogHandler(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		start := time.Now()
-		next.ServeHTTP(w, req)
-		s.log.Info(fmt.Sprintf(
-			"%s %s %s %s %d %s %s",
-			req.RemoteAddr,
-			req.Method,
-			req.RequestURI,
-			req.Proto,
-			req.Response.StatusCode,
-			time.Since(start),
-			req.UserAgent(),
-		))
-	})
+	return s.server.Shutdown(ctx)
 }

@@ -3,8 +3,9 @@ package memorystorage
 import (
 	"context"
 	"fmt"
-	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage"
 	"sync"
+
+	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Storage struct {
@@ -20,20 +21,19 @@ func New() *Storage {
 
 func (s *Storage) Create(data storage.Event) (int64, error) {
 	s.mu.Lock()
-	curId := s.id
+	curID := s.id
 	s.id++
 	s.mu.Unlock()
-	data.ID = curId
-	s.db[curId] = data
+	data.ID = curID
+	s.db[curID] = data
 
-	return curId, nil
+	return curID, nil
 }
 
 func (s *Storage) Update(data storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	_, ok := s.db[data.ID]
-	if !ok {
+	if _, ok := s.db[data.ID]; !ok {
 		return fmt.Errorf("отсутствует запись с id = %d", data.ID)
 	}
 	s.db[data.ID] = data

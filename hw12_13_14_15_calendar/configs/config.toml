@@ -11,3 +11,6 @@ password = ""
 [http]
 host = "localhost"
 port = 8080
+
+[storage]
+in_memory = 1

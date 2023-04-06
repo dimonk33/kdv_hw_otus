@@ -1,17 +1,24 @@
 package main
 
 import (
-	"github.com/spf13/viper"
 	"strconv"
+
+	"github.com/spf13/viper"
+)
+
+const (
+	StorageInMemory = 1
+	StorageDB       = 2
 )
 
 // Config При желании конфигурацию можно вынести в internal/config.
 // Организация конфига в main принуждает нас сужать API компонентов, использовать
 // при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
 type Config struct {
-	Logger LoggerConf `mapstructure:"logger"`
-	pg     Postgres   `mapstructure:"db"`
-	server Server     `mapstructure:"server"`
+	Logger  LoggerConf `mapstructure:"logger"`
+	pg      Postgres   `mapstructure:"db"`
+	server  Server     `mapstructure:"server"`
+	storage Storage
 }
 
 type LoggerConf struct {
@@ -25,8 +32,12 @@ type Postgres struct {
 }
 
 type Server struct {
-	host string `mapstructure:"host"`
-	port int    `mapstructure:"port"`
+	Host string `mapstructure:"host"`
+	Port int    `mapstructure:"port"`
+}
+
+type Storage struct {
+	Type int `mapstructure:"type"`
 }
 
 func NewConfig() (Config, error) {
@@ -45,10 +56,14 @@ func (c *Config) init() error {
 	return nil
 }
 
-func (c *Config) GetDbUrl() string {
+func (c *Config) GetDBURL() string {
 	return "postgres://" + c.pg.User + ":" + c.pg.Password + "@" + c.pg.Host
 }
 
 func (c *Config) GetServerConnect() string {
-	return c.server.host + ":" + strconv.Itoa(c.server.port)
+	return c.server.Host + ":" + strconv.Itoa(c.server.Port)
+}
+
+func (c *Config) GetStorageType() int {
+	return c.storage.Type
 }

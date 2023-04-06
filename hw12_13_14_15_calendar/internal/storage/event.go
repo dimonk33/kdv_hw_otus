@@ -8,5 +8,5 @@ type Event struct {
 	StartTime   time.Time
 	EndTime     time.Time
 	Description string
-	OwnUserId   int
+	OwnUserID   int
 }

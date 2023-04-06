@@ -2,9 +2,10 @@ package app
 
 import (
 	"context"
-	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage"
 	"io"
 	"net/http"
+
+	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage"
 )
 
 type App struct {

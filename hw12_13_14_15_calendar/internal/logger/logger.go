@@ -7,7 +7,6 @@ import (
 
 const (
 	levelError = "error"
-	levelWarn  = "warning"
 	levelInfo  = "info"
 	levelDebug = "debug"
 )

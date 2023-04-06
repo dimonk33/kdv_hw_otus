@@ -2,14 +2,14 @@ package memorystorage
 
 import (
 	"context"
-	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStorage(t *testing.T) {
-
 	s := New()
 
 	t.Run("main logic", func(t *testing.T) {
@@ -21,7 +21,7 @@ func TestStorage(t *testing.T) {
 			StartTime:   evStartTime,
 			EndTime:     evEndTime,
 			Description: "Тестовое событие",
-			OwnUserId:   1,
+			OwnUserID:   1,
 		}
 
 		id, err := s.Create(event)

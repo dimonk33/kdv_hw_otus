@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/logger"
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage"
 	"github.com/jmoiron/sqlx"
@@ -43,7 +44,15 @@ func (s *Storage) Create(data storage.Event) (int64, error) {
 		OVERRIDING USER VALUE
 		VALUES
 		    ($1, $2, $3, $4, $5, $6)`
-	res, err := s.db.Exec(query, data.ID, data.Title, data.StartTime.Unix(), data.EndTime.Unix(), data.Description, data.OwnUserId)
+	res, err := s.db.Exec(
+		query,
+		data.ID,
+		data.Title,
+		data.StartTime.Unix(),
+		data.EndTime.Unix(),
+		data.Description,
+		data.OwnUserID,
+	)
 	if err != nil {
 		return 0, err
 	}
@@ -62,7 +71,15 @@ func (s *Storage) Update(data storage.Event) error {
 		    own_user_id = $6 
 		WHERE
 		    id = $1`
-	_, err := s.db.Exec(query, data.ID, data.Title, data.StartTime.Unix(), data.EndTime.Unix(), data.Description, data.OwnUserId)
+	_, err := s.db.Exec(
+		query,
+		data.ID,
+		data.Title,
+		data.StartTime.Unix(),
+		data.EndTime.Unix(),
+		data.Description,
+		data.OwnUserID,
+	)
 	if err != nil {
 		return err
 	}
