@@ -24,13 +24,14 @@ func TestStorage(t *testing.T) {
 			OwnUserID:   1,
 		}
 
-		id, err := s.Create(event)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		id, err := s.Create(ctx, event)
 		require.Nil(t, err)
 		require.Equal(t, id, int64(0))
 
 		event.ID = id
 		event.Title = "Тест2"
-		err = s.Update(event)
+		err = s.Update(ctx, event)
 		require.Nil(t, err)
 
 		y, m, d := evStartTime.Date()
@@ -39,7 +40,9 @@ func TestStorage(t *testing.T) {
 		require.Equal(t, len(events), 1)
 		require.Equal(t, events[0], event)
 
-		err = s.Delete(id)
+		err = s.Delete(ctx, id)
 		require.Nil(t, err)
+
+		cancel()
 	})
 }

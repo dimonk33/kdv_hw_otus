@@ -19,7 +19,9 @@ func New() *Storage {
 	return &Storage{db: db}
 }
 
-func (s *Storage) Create(data storage.Event) (int64, error) {
+type ValidateDate func(item storage.Event) bool
+
+func (s *Storage) Create(ctx context.Context, data storage.Event) (int64, error) {
 	s.mu.Lock()
 	curID := s.id
 	s.id++
@@ -30,7 +32,7 @@ func (s *Storage) Create(data storage.Event) (int64, error) {
 	return curID, nil
 }
 
-func (s *Storage) Update(data storage.Event) error {
+func (s *Storage) Update(ctx context.Context, data storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.db[data.ID]; !ok {
@@ -40,60 +42,57 @@ func (s *Storage) Update(data storage.Event) error {
 	return nil
 }
 
-func (s *Storage) Delete(id int64) error {
+func (s *Storage) Delete(ctx context.Context, id int64) error {
 	delete(s.db, id)
 	return nil
 }
 
-func (s *Storage) ListOnDate(ctx context.Context, year int, month int, day int) ([]storage.Event, error) {
-	var out []storage.Event
-	for _, item := range s.db {
-		select {
-		case <-ctx.Done():
-			return out, ctx.Err()
-		default:
-			yS, mS, dS := item.StartTime.Date()
-			yE, mE, dE := item.EndTime.Date()
-			if (yS == year && int(mS) == month && dS == day) || (yE == year && int(mE) == month && dE == day) {
-				out = append(out, item)
-			}
-		}
-	}
-
-	return out, nil
+func (s *Storage) ListOnDate(ctx context.Context, year, month, day int) ([]storage.Event, error) {
+	return s.listItems(ctx, func(item storage.Event) bool {
+		yS, mS, dS := item.StartTime.Date()
+		yE, mE, dE := item.EndTime.Date()
+		return (yS == year && int(mS) == month && dS == day) || (yE == year && int(mE) == month && dE == day)
+	})
 }
 
-func (s *Storage) ListOnWeek(ctx context.Context, year int, week int) ([]storage.Event, error) {
-	var out []storage.Event
-	for _, item := range s.db {
-		select {
-		case <-ctx.Done():
-			return out, ctx.Err()
-		default:
-			yS, wS := item.StartTime.ISOWeek()
-			yE, wE := item.EndTime.ISOWeek()
-			if (yS == year && wS == week) || (yE == year && wE == week) {
-				out = append(out, item)
-			}
-		}
-	}
-
-	return out, nil
+func (s *Storage) ListOnWeek(ctx context.Context, year, week int) ([]storage.Event, error) {
+	return s.listItems(ctx, func(item storage.Event) bool {
+		yS, wS := item.StartTime.ISOWeek()
+		yE, wE := item.EndTime.ISOWeek()
+		return (yS == year && wS == week) || (yE == year && wE == week)
+	})
 }
 
-func (s *Storage) ListOnMonth(ctx context.Context, year int, month int) ([]storage.Event, error) {
+func (s *Storage) ListOnMonth(ctx context.Context, year, month int) ([]storage.Event, error) {
+	return s.listItems(ctx, func(item storage.Event) bool {
+		yS, mS, _ := item.StartTime.Date()
+		yE, mE, _ := item.EndTime.Date()
+		return (yS == year && int(mS) == month) || (yE == year && int(mE) == month)
+	})
+}
+
+func (s *Storage) listItems(ctx context.Context, validate ValidateDate) ([]storage.Event, error) {
 	var out []storage.Event
-	for _, item := range s.db {
+	var i int64
+	var ok bool
+	var item storage.Event
+
+	for {
+		s.mu.RLock()
+		item, ok = s.db[i]
+		s.mu.RUnlock()
+		if !ok {
+			break
+		}
 		select {
 		case <-ctx.Done():
 			return out, ctx.Err()
 		default:
-			yS, mS, _ := item.StartTime.Date()
-			yE, mE, _ := item.EndTime.Date()
-			if (yS == year && int(mS) == month) || (yE == year && int(mE) == month) {
+			if validate(item) {
 				out = append(out, item)
 			}
 		}
+		i++
 	}
 
 	return out, nil

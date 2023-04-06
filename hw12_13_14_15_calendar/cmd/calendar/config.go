@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net"
 	"strconv"
 
 	"github.com/spf13/viper"
@@ -60,8 +61,8 @@ func (c *Config) GetDBURL() string {
 	return "postgres://" + c.pg.User + ":" + c.pg.Password + "@" + c.pg.Host
 }
 
-func (c *Config) GetServerConnect() string {
-	return c.server.Host + ":" + strconv.Itoa(c.server.Port)
+func (c *Config) GetServerAddr() string {
+	return net.JoinHostPort(c.server.Host, strconv.Itoa(c.server.Port))
 }
 
 func (c *Config) GetStorageType() int {

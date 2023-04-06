@@ -21,9 +21,9 @@ type Logger interface {
 }
 
 type Storage interface {
-	Create(data storage.Event) (int64, error)
-	Update(data storage.Event) error
-	Delete(id int64) error
+	Create(ctx context.Context, data storage.Event) (int64, error)
+	Update(ctx context.Context, data storage.Event) error
+	Delete(ctx context.Context, id int64) error
 	ListOnDate(ctx context.Context, year int, month int, day int) ([]storage.Event, error)
 	ListOnWeek(ctx context.Context, year int, week int) ([]storage.Event, error)
 	ListOnMonth(ctx context.Context, year int, month int) ([]storage.Event, error)

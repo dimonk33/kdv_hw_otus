@@ -2,11 +2,9 @@
 level = "INFO"
 
 [db]
-type = "in-memory"
 host = "localhost"
-port = 5432
-user = "postgres"
-password = ""
+user = "user"
+password = "password"
 
 [http]
 host = "localhost"

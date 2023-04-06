@@ -29,7 +29,7 @@ func (s *Storage) Close() error {
 	return s.db.Close()
 }
 
-func (s *Storage) Create(data storage.Event) (int64, error) {
+func (s *Storage) Create(ctx context.Context, data storage.Event) (int64, error) {
 	query := `
 		INSERT INTO 
 		    events
@@ -44,7 +44,8 @@ func (s *Storage) Create(data storage.Event) (int64, error) {
 		OVERRIDING USER VALUE
 		VALUES
 		    ($1, $2, $3, $4, $5, $6)`
-	res, err := s.db.Exec(
+	res, err := s.db.ExecContext(
+		ctx,
 		query,
 		data.ID,
 		data.Title,
@@ -59,7 +60,7 @@ func (s *Storage) Create(data storage.Event) (int64, error) {
 	return res.LastInsertId()
 }
 
-func (s *Storage) Update(data storage.Event) error {
+func (s *Storage) Update(ctx context.Context, data storage.Event) error {
 	query := `
 		UPDATE 
 		    events 
@@ -71,7 +72,8 @@ func (s *Storage) Update(data storage.Event) error {
 		    own_user_id = $6 
 		WHERE
 		    id = $1`
-	_, err := s.db.Exec(
+	_, err := s.db.ExecContext(
+		ctx,
 		query,
 		data.ID,
 		data.Title,
@@ -80,23 +82,17 @@ func (s *Storage) Update(data storage.Event) error {
 		data.Description,
 		data.OwnUserID,
 	)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
-func (s *Storage) Delete(id int64) error {
+func (s *Storage) Delete(ctx context.Context, id int64) error {
 	query := `
 		DELETE FROM 
 			events
 		WHERE
 		    id = $1`
-	_, err := s.db.Exec(query, id)
-	if err != nil {
-		return err
-	}
-	return nil
+	_, err := s.db.ExecContext(ctx, query, id)
+	return err
 }
 
 func (s *Storage) ListOnDate(ctx context.Context, year int, month int, day int) ([]storage.Event, error) {
