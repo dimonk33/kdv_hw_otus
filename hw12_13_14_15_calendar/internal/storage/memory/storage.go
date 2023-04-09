@@ -43,6 +43,8 @@ func (s *Storage) Update(ctx context.Context, data storage.Event) error {
 }
 
 func (s *Storage) Delete(ctx context.Context, id int64) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	delete(s.db, id)
 	return nil
 }
