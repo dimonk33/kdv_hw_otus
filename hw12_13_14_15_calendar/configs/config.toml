@@ -1,5 +1,14 @@
 [logger]
 level = "INFO"
 
-# TODO
-# ...
+[db]
+host = "localhost"
+user = "user"
+password = "password"
+
+[http]
+host = "localhost"
+port = 8080
+
+[storage]
+in_memory = 1

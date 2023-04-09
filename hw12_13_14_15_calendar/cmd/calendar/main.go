@@ -3,15 +3,17 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
+	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/app"
+	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/server/http"
+	memorystorage "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
@@ -28,17 +30,29 @@ func main() {
 		return
 	}
 
-	config := NewConfig()
+	config, err := NewConfig()
+	if err != nil {
+		fmt.Println("Ошибка инициализации конфигуратора: " + err.Error())
+		os.Exit(1)
+	}
 	logg := logger.New(config.Logger.Level)
 
-	storage := memorystorage.New()
+	var storage app.Storage
+	switch config.GetStorageType() {
+	case StorageInMemory:
+		storage = memorystorage.New()
+	case StorageDB:
+		storage = sqlstorage.New(config.GetDBURL(), logg)
+	default:
+		logg.Error("Неподдерживаемый тип хранилища")
+		os.Exit(1)
+	}
 	calendar := app.New(logg, storage)
 
-	server := internalhttp.NewServer(logg, calendar)
+	server := internalhttp.NewServer(config.GetServerAddr(), logg, calendar)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
-	defer cancel()
 
 	go func() {
 		<-ctx.Done()
@@ -56,6 +70,6 @@ func main() {
 	if err := server.Start(ctx); err != nil {
 		logg.Error("failed to start http server: " + err.Error())
 		cancel()
-		os.Exit(1) //nolint:gocritic
+		os.Exit(1)
 	}
 }
