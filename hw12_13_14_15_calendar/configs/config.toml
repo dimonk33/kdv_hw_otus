@@ -10,5 +10,9 @@ password = "password"
 host = "localhost"
 port = 8080
 
+[grpc]
+host = "localhost"
+port = 5555
+
 [storage]
 in_memory = 1

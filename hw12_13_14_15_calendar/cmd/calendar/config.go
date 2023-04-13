@@ -16,10 +16,11 @@ const (
 // Организация конфига в main принуждает нас сужать API компонентов, использовать
 // при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
 type Config struct {
-	Logger  LoggerConf `mapstructure:"logger"`
-	pg      Postgres   `mapstructure:"db"`
-	server  Server     `mapstructure:"server"`
-	storage Storage
+	Logger     LoggerConf `mapstructure:"logger"`
+	pg         Postgres   `mapstructure:"db"`
+	httpServer Server     `mapstructure:"http"`
+	grpcServer Server     `mapstructure:"grpc"`
+	storage    Storage
 }
 
 type LoggerConf struct {
@@ -62,7 +63,7 @@ func (c *Config) GetDBURL() string {
 }
 
 func (c *Config) GetServerAddr() string {
-	return net.JoinHostPort(c.server.Host, strconv.Itoa(c.server.Port))
+	return net.JoinHostPort(c.httpServer.Host, strconv.Itoa(c.httpServer.Port))
 }
 
 func (c *Config) GetStorageType() int {
