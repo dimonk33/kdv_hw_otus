@@ -21,24 +21,24 @@ func New() *Storage {
 
 type ValidateDate func(item storage.Event) bool
 
-func (s *Storage) Create(ctx context.Context, data storage.Event) (int64, error) {
+func (s *Storage) Create(ctx context.Context, data *storage.Event) (int64, error) {
 	s.mu.Lock()
 	curID := s.id
 	s.id++
 	s.mu.Unlock()
 	data.ID = curID
-	s.db[curID] = data
+	s.db[curID] = *data
 
 	return curID, nil
 }
 
-func (s *Storage) Update(ctx context.Context, data storage.Event) error {
+func (s *Storage) Update(ctx context.Context, data *storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.db[data.ID]; !ok {
 		return fmt.Errorf("отсутствует запись с id = %d", data.ID)
 	}
-	s.db[data.ID] = data
+	s.db[data.ID] = *data
 	return nil
 }
 

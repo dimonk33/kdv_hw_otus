@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage"
 )
 
@@ -18,8 +19,8 @@ type Logger interface {
 }
 
 type Storage interface {
-	Create(ctx context.Context, data storage.Event) (int64, error)
-	Update(ctx context.Context, data storage.Event) error
+	Create(ctx context.Context, data *storage.Event) (int64, error)
+	Update(ctx context.Context, data *storage.Event) error
 	Delete(ctx context.Context, id int64) error
 	ListOnDate(ctx context.Context, year int, month int, day int) ([]storage.Event, error)
 	ListOnWeek(ctx context.Context, year int, week int) ([]storage.Event, error)
@@ -33,16 +34,16 @@ func New(logger Logger, storage Storage) *App {
 	}
 }
 
-func (a *App) CreateEvent(ctx context.Context, e storage.Event) (int64, error) {
+func (a *App) CreateEvent(ctx context.Context, e *storage.Event) (int64, error) {
 	return a.storage.Create(ctx, e)
 }
 
-func (a *App) UpdateEvent(ctx context.Context, e storage.Event) error {
+func (a *App) UpdateEvent(ctx context.Context, e *storage.Event) error {
 	return a.storage.Update(ctx, e)
 }
 
-func (a *App) DeleteEvent(ctx context.Context, ID int64) error {
-	return a.storage.Delete(ctx, ID)
+func (a *App) DeleteEvent(ctx context.Context, id int64) error {
+	return a.storage.Delete(ctx, id)
 }
 
 func (a *App) ListEventOnDate(ctx context.Context, year int, month int, day int) ([]storage.Event, error) {

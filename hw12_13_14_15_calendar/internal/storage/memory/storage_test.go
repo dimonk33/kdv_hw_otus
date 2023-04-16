@@ -25,13 +25,13 @@ func TestStorage(t *testing.T) {
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		id, err := s.Create(ctx, event)
+		id, err := s.Create(ctx, &event)
 		require.Nil(t, err)
 		require.Equal(t, id, int64(0))
 
 		event.ID = id
 		event.Title = "Тест2"
-		err = s.Update(ctx, event)
+		err = s.Update(ctx, &event)
 		require.Nil(t, err)
 
 		y, m, d := evStartTime.Date()

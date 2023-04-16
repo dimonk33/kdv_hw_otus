@@ -62,8 +62,12 @@ func (c *Config) GetDBURL() string {
 	return "postgres://" + c.pg.User + ":" + c.pg.Password + "@" + c.pg.Host
 }
 
-func (c *Config) GetServerAddr() string {
+func (c *Config) GetHttpServerAddr() string {
 	return net.JoinHostPort(c.httpServer.Host, strconv.Itoa(c.httpServer.Port))
+}
+
+func (c *Config) GetGrpcServerAddr() string {
+	return net.JoinHostPort(c.grpcServer.Host, strconv.Itoa(c.grpcServer.Port))
 }
 
 func (c *Config) GetStorageType() int {

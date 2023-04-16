@@ -4,11 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	internalgrpc "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/server/grpc"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	internalgrpc "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/server/grpc"
 
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/app"
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/logger"
@@ -50,8 +51,8 @@ func main() {
 	}
 	calendar := app.New(logg, storage)
 
-	httpServer := internalhttp.NewServer(config.GetServerAddr(), logg, calendar)
-	grpcServer := internalgrpc.NewServer(config.GetServerAddr(), logg, calendar)
+	grpcServer := internalgrpc.NewServer(config.GetHttpServerAddr(), logg, calendar)
+	httpServer := internalhttp.NewServer(config.GetGrpcServerAddr(), logg, grpcServer)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -77,10 +78,6 @@ func main() {
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 		defer cancel()
-
-		if err := httpServer.Stop(ctx); err != nil {
-			logg.Error("failed to stop httpServer: " + err.Error())
-		}
 
 		if err := grpcServer.Stop(ctx); err != nil {
 			logg.Error("failed to stop grpcServer: " + err.Error())
