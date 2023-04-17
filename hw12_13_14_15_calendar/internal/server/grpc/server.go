@@ -37,7 +37,8 @@ type Application interface {
 }
 
 func NewServer(addr string, logger Logger, app Application) *Server {
-	s := grpc.NewServer()
+	m := Middleware{Logger: logger}
+	s := grpc.NewServer(grpc.UnaryInterceptor(m.unaryInterceptor))
 	myInvoicerServer := &Server{
 		logger:     logger,
 		addr:       addr,

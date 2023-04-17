@@ -9,10 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	internalgrpc "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/server/grpc"
-
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/app"
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/logger"
+	internalgrpc "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/server/grpc"
 	internalhttp "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage/sql"
@@ -51,7 +50,7 @@ func main() {
 	}
 	calendar := app.New(logg, storage)
 
-	grpcServer := internalgrpc.NewServer(config.GetHttpServerAddr(), logg, calendar)
+	grpcServer := internalgrpc.NewServer(config.GetHTTPServerAddr(), logg, calendar)
 	httpServer := internalhttp.NewServer(config.GetGrpcServerAddr(), logg, grpcServer)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
