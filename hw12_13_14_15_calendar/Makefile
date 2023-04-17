@@ -32,9 +32,9 @@ lint: install-lint-deps
 	golangci-lint run ./...
 
 migrate:
-	cd migrations || goose postgres "user=user password=password  dbname=hw sslmode=disable" up || cd ..
+	cd migrations && goose postgres "user=user password=password  dbname=hw sslmode=disable" up && cd ..
 
 generate:
-	cd api || protoc -I .  --go_out=. --go-grpc_out=. --grpc-gateway_out ./gen --grpc-gateway_opt logtostderr=true --grpc-gateway_opt paths=source_relative --grpc-gateway_opt generate_unbound_methods=true EventService.proto || cd ..
+	cd api && mkdir gen ; go generate ; cd ..
 
-.PHONY: build run build-img run-img version test lint
+.PHONY: build run build-img run-img version test lint migrate generate
