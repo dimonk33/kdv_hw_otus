@@ -16,7 +16,7 @@ type Storage struct {
 
 func New() *Storage {
 	db := make(map[int64]storage.Event, 1)
-	return &Storage{db: db}
+	return &Storage{db: db, id: 1}
 }
 
 type ValidateDate func(item storage.Event) bool
