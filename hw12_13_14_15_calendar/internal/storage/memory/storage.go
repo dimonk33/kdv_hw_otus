@@ -75,7 +75,7 @@ func (s *Storage) ListOnMonth(ctx context.Context, year, month int) ([]storage.E
 
 func (s *Storage) listItems(ctx context.Context, validate ValidateDate) ([]storage.Event, error) {
 	var out []storage.Event
-	var i int64
+	var i int64 = 1
 	var ok bool
 	var item storage.Event
 
