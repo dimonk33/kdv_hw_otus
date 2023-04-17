@@ -35,7 +35,7 @@ message Error {
 }
 
 message CreateEventRequest {
-    Event data = 1;
+    Event Data = 1;
 }
 
 message CreateEventResult {
@@ -44,7 +44,7 @@ message CreateEventResult {
 }
 
 message UpdateEventRequest {
-    Event data = 1;
+    Event Data = 1;
 }
 
 message UpdateEventResult {
@@ -60,32 +60,32 @@ message DeleteEventResult {
 }
 
 message ListEventOnDateRequest {
-    int32 year = 1;
-    int32 month = 2;
-    int32 day = 3;
+    int32 Year = 1;
+    int32 Month = 2;
+    int32 Day = 3;
 }
 
 message ListEventOnDateResult {
-    repeated Event data = 1;
+    repeated Event Data = 1;
     Error Err = 2;
 }
 
 message ListEventOnWeekRequest {
-    int32 year = 1;
-    int32 week = 2;
+    int32 Year = 1;
+    int32 Week = 2;
 }
 
 message ListEventOnWeekResult {
-    repeated Event data = 1;
+    repeated Event Data = 1;
     Error Err = 2;
 }
 
 message ListEventOnMonthRequest {
-    int32 year = 1;
-    int32 month = 2;
+    int32 Year = 1;
+    int32 Month = 2;
 }
 
 message ListEventOnMonthResult {
-    repeated Event data = 1;
+    repeated Event Data = 1;
     Error Err = 2;
 }

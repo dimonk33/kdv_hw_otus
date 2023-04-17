@@ -60,7 +60,7 @@ func TestGrpcHandler(t *testing.T) {
 
 			// assert results expectations
 			if testCase.expectedErr {
-				require.NotNil(t, err)
+				require.Error(t, err)
 			} else {
 				require.Equal(t, int64(1), response.ID)
 			}

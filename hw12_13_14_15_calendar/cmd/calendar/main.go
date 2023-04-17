@@ -78,6 +78,9 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 		defer cancel()
 
+		if err := httpServer.Stop(ctx); err != nil {
+			logg.Error("failed to stop http server: " + err.Error())
+		}
 		if err := grpcServer.Stop(ctx); err != nil {
 			logg.Error("failed to stop grpcServer: " + err.Error())
 		}

@@ -7,14 +7,14 @@ import (
 )
 
 type Middleware struct {
-	Logger Logger
+	logger Logger
 }
 
 func (m *Middleware) Logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		next.ServeHTTP(w, r)
-		m.Logger.Info(fmt.Sprintf(
+		m.logger.Info(fmt.Sprintf(
 			"%s %s %s %s %d %s %s",
 			r.RemoteAddr,
 			r.Method,

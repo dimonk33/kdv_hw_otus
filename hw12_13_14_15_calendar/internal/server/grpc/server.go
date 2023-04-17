@@ -74,48 +74,43 @@ func (s *Server) Stop(ctx context.Context) error {
 }
 
 func (s *Server) CreateEvent(ctx context.Context, req *gen.CreateEventRequest) (*gen.CreateEventResult, error) {
-	res := &gen.CreateEventResult{}
 	ev := req.GetData()
 
-	if ev == nil {
-		return res, errors.New("пустой запрос")
+	if !ev.GetStartTime().IsValid() {
+		return nil, errors.New("неверный формат даты старта")
 	}
 
-	if ev.Title == "" {
-		return res, errors.New("пустой заголовок")
-	}
-
-	if !ev.StartTime.IsValid() {
-		return res, errors.New("неверный формат даты старта")
-	}
-
-	if !ev.EndTime.IsValid() {
-		return res, errors.New("неверный формат даты окончания")
-	}
-
-	if ev.OwnUserID == 0 {
-		return res, errors.New("неверный пользователь")
+	if !ev.GetEndTime().IsValid() {
+		return nil, errors.New("неверный формат даты окончания")
 	}
 
 	data := storage.Event{
-		Title:       ev.Title,
-		Description: ev.Description,
-		StartTime:   ev.StartTime.AsTime(),
-		EndTime:     ev.EndTime.AsTime(),
-		OwnUserID:   ev.OwnUserID,
+		Title:       ev.GetTitle(),
+		Description: ev.GetDescription(),
+		StartTime:   ev.GetStartTime().AsTime(),
+		EndTime:     ev.GetEndTime().AsTime(),
+		OwnUserID:   ev.GetOwnUserID(),
+	}
+
+	if data.Title == "" {
+		return nil, errors.New("пустой заголовок")
+	}
+
+	if data.OwnUserID <= 0 {
+		return nil, errors.New("неверный пользователь")
 	}
 
 	if data.StartTime.Before(time.Now()) {
-		return res, errors.New("неверная дата старта")
+		return nil, errors.New("неверная дата старта")
 	}
 
 	if data.EndTime.Before(data.StartTime) {
-		return res, errors.New("неверная дата окончания")
+		return nil, errors.New("неверная дата окончания")
 	}
 
 	id, err := s.worker.CreateEvent(ctx, &data)
 
-	res.ID = id
+	res := &gen.CreateEventResult{ID: id}
 	if err != nil {
 		res.Err = &gen.Error{Description: err.Error()}
 	}
@@ -124,72 +119,65 @@ func (s *Server) CreateEvent(ctx context.Context, req *gen.CreateEventRequest) (
 }
 
 func (s *Server) UpdateEvent(ctx context.Context, req *gen.UpdateEventRequest) (*gen.UpdateEventResult, error) {
-	res := &gen.UpdateEventResult{}
 	ev := req.GetData()
 
-	if ev == nil {
-		return res, errors.New("пустой запрос")
-	}
-
-	if ev.ID == 0 {
-		return res, errors.New("неверный ID события")
-	}
-
-	if ev.Title == "" {
-		return res, errors.New("пустой заголовок")
-	}
-
 	if !ev.StartTime.IsValid() {
-		return res, errors.New("неверный формат даты старта")
+		return nil, errors.New("неверный формат даты старта")
 	}
 
 	if !ev.EndTime.IsValid() {
-		return res, errors.New("неверный формат даты окончания")
-	}
-
-	if ev.OwnUserID == 0 {
-		return res, errors.New("неверный пользователь")
+		return nil, errors.New("неверный формат даты окончания")
 	}
 
 	data := storage.Event{
-		ID:          ev.ID,
-		Title:       ev.Title,
-		Description: ev.Description,
-		StartTime:   ev.StartTime.AsTime(),
-		EndTime:     ev.EndTime.AsTime(),
-		OwnUserID:   ev.OwnUserID,
+		ID:          ev.GetID(),
+		Title:       ev.GetTitle(),
+		Description: ev.GetDescription(),
+		StartTime:   ev.GetStartTime().AsTime(),
+		EndTime:     ev.GetEndTime().AsTime(),
+		OwnUserID:   ev.GetOwnUserID(),
+	}
+
+	if data.OwnUserID <= 0 {
+		return nil, errors.New("неверный ID события")
+	}
+
+	if data.Title == "" {
+		return nil, errors.New("пустой заголовок")
+	}
+
+	if data.OwnUserID <= 0 {
+		return nil, errors.New("неверный пользователь")
 	}
 
 	if data.StartTime.Before(time.Now()) {
-		return res, errors.New("неверная дата старта")
+		return nil, errors.New("неверная дата старта")
 	}
 
 	if data.EndTime.Before(data.StartTime) {
-		return res, errors.New("неверная дата окончания")
+		return nil, errors.New("неверная дата окончания")
 	}
 
 	err := s.worker.UpdateEvent(ctx, &data)
+
+	var res *gen.UpdateEventResult
 	if err != nil {
-		res.Err = &gen.Error{Description: err.Error()}
+		res = &gen.UpdateEventResult{Err: &gen.Error{Description: err.Error()}}
 	}
 
 	return res, nil
 }
 
 func (s *Server) DeleteEvent(ctx context.Context, req *gen.DeleteEventRequest) (*gen.DeleteEventResult, error) {
-	res := &gen.DeleteEventResult{}
-
-	if req == nil {
-		return res, errors.New("пустой запрос")
-	}
-
-	if req.ID == 0 {
-		return res, errors.New("неверный ID события")
+	if req.GetID() <= 0 {
+		return nil, errors.New("неверный ID события")
 	}
 
 	err := s.worker.DeleteEvent(ctx, req.ID)
+
+	var res *gen.DeleteEventResult
 	if err != nil {
-		res.Err = &gen.Error{Description: err.Error()}
+		res = &gen.DeleteEventResult{Err: &gen.Error{Description: err.Error()}}
 	}
 	return res, nil
 }
@@ -198,14 +186,15 @@ func (s *Server) ListEventOnDate(
 	ctx context.Context,
 	req *gen.ListEventOnDateRequest,
 ) (*gen.ListEventOnDateResult, error) {
-	res := &gen.ListEventOnDateResult{}
-	if req == nil {
-		return res, errors.New("пустой запрос")
+	y := int(req.GetYear())
+	m := int(req.GetMonth())
+	d := int(req.GetDay())
+	if y <= 0 || m <= 0 || d <= 0 {
+		return nil, errors.New("неверная дата")
 	}
+	data, err := s.worker.ListEventOnDate(ctx, y, m, d)
 
-	data, err := s.worker.ListEventOnDate(ctx, int(req.Year), int(req.Month), int(req.Day))
-
-	res.Data = s.convertListData(data)
+	res := &gen.ListEventOnDateResult{Data: s.convertListData(data)}
 	if err != nil {
 		res.Err = &gen.Error{Description: err.Error()}
 	}
@@ -216,12 +205,14 @@ func (s *Server) ListEventOnWeek(
 	ctx context.Context,
 	req *gen.ListEventOnWeekRequest,
 ) (*gen.ListEventOnWeekResult, error) {
-	res := &gen.ListEventOnWeekResult{}
-	if req == nil {
-		return res, errors.New("пустой запрос")
+	y := int(req.GetYear())
+	w := int(req.GetWeek())
+	if y <= 0 || w <= 0 {
+		return nil, errors.New("неверная дата")
 	}
-	data, err := s.worker.ListEventOnWeek(ctx, int(req.Year), int(req.Week))
-	res.Data = s.convertListData(data)
+	data, err := s.worker.ListEventOnWeek(ctx, y, w)
+
+	res := &gen.ListEventOnWeekResult{Data: s.convertListData(data)}
 	if err != nil {
 		res.Err = &gen.Error{Description: err.Error()}
 	}
@@ -233,12 +224,14 @@ func (s *Server) ListEventOnMonth(
 	ctx context.Context,
 	req *gen.ListEventOnMonthRequest,
 ) (*gen.ListEventOnMonthResult, error) {
-	res := &gen.ListEventOnMonthResult{}
-	if req == nil {
-		return res, errors.New("пустой запрос")
+	y := int(req.GetYear())
+	m := int(req.GetMonth())
+	if y <= 0 || m <= 0 {
+		return nil, errors.New("неверная дата")
 	}
-	data, err := s.worker.ListEventOnMonth(ctx, int(req.Year), int(req.Month))
-	res.Data = s.convertListData(data)
+	data, err := s.worker.ListEventOnMonth(ctx, y, m)
+
+	res := &gen.ListEventOnMonthResult{Data: s.convertListData(data)}
 	if err != nil {
 		res.Err = &gen.Error{Description: err.Error()}
 	}
