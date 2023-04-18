@@ -29,7 +29,7 @@ func (s *Storage) Close() error {
 	return s.db.Close()
 }
 
-func (s *Storage) Create(ctx context.Context, data storage.Event) (int64, error) {
+func (s *Storage) Create(ctx context.Context, data *storage.Event) (int64, error) {
 	query := `
 		INSERT INTO 
 		    events
@@ -60,7 +60,7 @@ func (s *Storage) Create(ctx context.Context, data storage.Event) (int64, error)
 	return res.LastInsertId()
 }
 
-func (s *Storage) Update(ctx context.Context, data storage.Event) error {
+func (s *Storage) Update(ctx context.Context, data *storage.Event) error {
 	query := `
 		UPDATE 
 		    events 

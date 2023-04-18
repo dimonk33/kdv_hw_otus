@@ -10,7 +10,7 @@ type Middleware struct {
 	logger Logger
 }
 
-func (m *Middleware) logging(next http.Handler) http.Handler {
+func (m *Middleware) Logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		next.ServeHTTP(w, r)

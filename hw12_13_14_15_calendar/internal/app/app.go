@@ -2,8 +2,6 @@ package app
 
 import (
 	"context"
-	"io"
-	"net/http"
 
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage"
 )
@@ -21,8 +19,8 @@ type Logger interface {
 }
 
 type Storage interface {
-	Create(ctx context.Context, data storage.Event) (int64, error)
-	Update(ctx context.Context, data storage.Event) error
+	Create(ctx context.Context, data *storage.Event) (int64, error)
+	Update(ctx context.Context, data *storage.Event) error
 	Delete(ctx context.Context, id int64) error
 	ListOnDate(ctx context.Context, year int, month int, day int) ([]storage.Event, error)
 	ListOnWeek(ctx context.Context, year int, week int) ([]storage.Event, error)
@@ -36,20 +34,26 @@ func New(logger Logger, storage Storage) *App {
 	}
 }
 
-func (a *App) CreateEvent(ctx context.Context, id, title string) error {
-	// TODO
-	return nil
-	// return a.storage.CreateEvent(storage.Event{ID: id, Title: title})
+func (a *App) CreateEvent(ctx context.Context, e *storage.Event) (int64, error) {
+	return a.storage.Create(ctx, e)
 }
 
-func (a *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
-	writeBytes, err := io.WriteString(w, "Hello, HTTP!\n")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte("500 - " + err.Error()))
-	}
-	if writeBytes == 0 {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte("500 - Данные не отправлены"))
-	}
+func (a *App) UpdateEvent(ctx context.Context, e *storage.Event) error {
+	return a.storage.Update(ctx, e)
+}
+
+func (a *App) DeleteEvent(ctx context.Context, id int64) error {
+	return a.storage.Delete(ctx, id)
+}
+
+func (a *App) ListEventOnDate(ctx context.Context, year int, month int, day int) ([]storage.Event, error) {
+	return a.storage.ListOnDate(ctx, year, month, day)
+}
+
+func (a *App) ListEventOnWeek(ctx context.Context, year int, week int) ([]storage.Event, error) {
+	return a.storage.ListOnWeek(ctx, year, week)
+}
+
+func (a *App) ListEventOnMonth(ctx context.Context, year int, month int) ([]storage.Event, error) {
+	return a.storage.ListOnMonth(ctx, year, month)
 }

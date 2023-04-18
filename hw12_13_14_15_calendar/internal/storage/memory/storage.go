@@ -16,33 +16,35 @@ type Storage struct {
 
 func New() *Storage {
 	db := make(map[int64]storage.Event, 1)
-	return &Storage{db: db}
+	return &Storage{db: db, id: 1}
 }
 
 type ValidateDate func(item storage.Event) bool
 
-func (s *Storage) Create(ctx context.Context, data storage.Event) (int64, error) {
+func (s *Storage) Create(ctx context.Context, data *storage.Event) (int64, error) {
 	s.mu.Lock()
 	curID := s.id
 	s.id++
 	s.mu.Unlock()
 	data.ID = curID
-	s.db[curID] = data
+	s.db[curID] = *data
 
 	return curID, nil
 }
 
-func (s *Storage) Update(ctx context.Context, data storage.Event) error {
+func (s *Storage) Update(ctx context.Context, data *storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.db[data.ID]; !ok {
 		return fmt.Errorf("отсутствует запись с id = %d", data.ID)
 	}
-	s.db[data.ID] = data
+	s.db[data.ID] = *data
 	return nil
 }
 
 func (s *Storage) Delete(ctx context.Context, id int64) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	delete(s.db, id)
 	return nil
 }
@@ -73,7 +75,7 @@ func (s *Storage) ListOnMonth(ctx context.Context, year, month int) ([]storage.E
 
 func (s *Storage) listItems(ctx context.Context, validate ValidateDate) ([]storage.Event, error) {
 	var out []storage.Event
-	var i int64
+	var i int64 = 1
 	var ok bool
 	var item storage.Event
 
