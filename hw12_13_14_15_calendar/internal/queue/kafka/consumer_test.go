@@ -29,9 +29,9 @@ func TestConsumer(t *testing.T) {
 		//require.Nil(t, err)
 
 		c := NewConsumer("localhost:9092", "test", logger.New(logger.LevelDebug))
-		c.start()
-		defer c.stop()
-		rdata, err := c.read(ctx)
+		c.Start()
+		defer c.Stop()
+		rdata, err := c.Read(ctx)
 		require.Nil(t, err)
 		require.NotNil(t, rdata)
 	})
