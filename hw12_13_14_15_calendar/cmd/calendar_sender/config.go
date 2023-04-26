@@ -4,11 +4,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-const (
-	StorageInMemory = 1
-	StorageDB       = 2
-)
-
 type Config struct {
 	Logger LoggerConf `mapstructure:"logger"`
 	Queue  Queue      `mapstructure:"queue"`
