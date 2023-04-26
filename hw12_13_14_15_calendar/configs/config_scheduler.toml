@@ -1,0 +1,14 @@
+[logger]
+level = "INFO"
+
+[db]
+host = "localhost"
+user = "user"
+password = "password"
+
+[kafka]
+broker = "localhost:9092"
+topic = "notify"
+
+[storage]
+in_memory = 1

@@ -3,6 +3,7 @@ package scheduler
 import (
 	"context"
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage"
+	"strconv"
 	"time"
 )
 
@@ -27,6 +28,13 @@ type Storage interface {
 
 type Sender interface {
 	Send(ctx context.Context, data any) error
+}
+
+type Notify struct {
+	ID    int64     `json:"id"`
+	Title string    `json:"title"`
+	Date  time.Time `json:"date"`
+	User  string    `json:"user"`
 }
 
 func NewScheduler(_storage Storage, _sender Sender, _logger Logger) *Scheduler {
@@ -97,5 +105,11 @@ func (s *Scheduler) clearEvents(ctx context.Context) error {
 }
 
 func (s *Scheduler) sendEventToQueue(ctx context.Context, event storage.Event) error {
-	return s.sender.Send(ctx, event)
+	notify := Notify{
+		ID:    event.ID,
+		Title: event.Title,
+		Date:  event.StartTime,
+		User:  strconv.Itoa(int(event.OwnUserID)),
+	}
+	return s.sender.Send(ctx, notify)
 }

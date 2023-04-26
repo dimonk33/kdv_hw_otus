@@ -1,0 +1,6 @@
+[logger]
+level = "INFO"
+
+[kafka]
+broker = "localhost:9092"
+topic = "notify"
