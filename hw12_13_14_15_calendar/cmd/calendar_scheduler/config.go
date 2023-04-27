@@ -10,10 +10,16 @@ const (
 )
 
 type Config struct {
+	Notify  Time       `mapstructure:"notify"`
 	Logger  LoggerConf `mapstructure:"logger"`
 	Pg      Postgres   `mapstructure:"db"`
 	Queue   Queue      `mapstructure:"queue"`
 	Storage Storage    `mapstructure:"storage"`
+}
+
+type Time struct {
+	Hour int `mapstructure:"hour"`
+	Min  int `mapstructure:"min"`
 }
 
 type LoggerConf struct {
@@ -65,4 +71,8 @@ func (c *Config) GetBroker() string {
 
 func (c *Config) GetTopic() string {
 	return c.Queue.Topic
+}
+
+func (c *Config) GetNotifyTime() (int, int) {
+	return c.Notify.Hour, c.Notify.Min
 }

@@ -1,3 +1,7 @@
+[cron]
+    hour = 9
+    min = 0
+
 [logger]
 level = "INFO"
 

@@ -4,14 +4,15 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/logger"
 	kafkaapp "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/queue/kafka"
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/scheduler"
 	memorystorage "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage/sql"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 var configFile string
@@ -48,7 +49,9 @@ func main() {
 
 	sender := kafkaapp.NewProducer(config.GetBroker(), config.GetTopic(), logg)
 
-	schlr := scheduler.NewScheduler(storage, sender, logg)
+	notifyHour, notifyMin := config.GetNotifyTime()
+
+	schlr := scheduler.NewScheduler(storage, sender, scheduler.NotifyTime{H: notifyHour, M: notifyMin}, logg)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)

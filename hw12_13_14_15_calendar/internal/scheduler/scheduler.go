@@ -2,15 +2,17 @@ package scheduler
 
 import (
 	"context"
-	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage"
 	"strconv"
 	"time"
+
+	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Scheduler struct {
-	storage Storage
-	sender  Sender
-	logger  Logger
+	notifyTime NotifyTime
+	storage    Storage
+	sender     Sender
+	logger     Logger
 }
 
 type Logger interface {
@@ -37,11 +39,17 @@ type Notify struct {
 	User  string    `json:"user"`
 }
 
-func NewScheduler(_storage Storage, _sender Sender, _logger Logger) *Scheduler {
+type NotifyTime struct {
+	H int
+	M int
+}
+
+func NewScheduler(_storage Storage, _sender Sender, _notifyTime NotifyTime, _logger Logger) *Scheduler {
 	s := &Scheduler{
-		storage: _storage,
-		sender:  _sender,
-		logger:  _logger,
+		storage:    _storage,
+		sender:     _sender,
+		notifyTime: _notifyTime,
+		logger:     _logger,
 	}
 
 	return s
@@ -56,7 +64,7 @@ func (s *Scheduler) Start(ctx context.Context) {
 				return
 			case <-ticker.C:
 				h, m, _ := time.Now().Clock()
-				if m == 0 && h == 8 {
+				if m == s.notifyTime.M && h == s.notifyTime.H {
 					s.logger.Info("отправка событий на день")
 					err := s.sendEvents(ctx)
 					if err != nil {

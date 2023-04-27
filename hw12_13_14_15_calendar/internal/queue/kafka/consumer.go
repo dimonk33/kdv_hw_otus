@@ -3,21 +3,21 @@ package kafkaapp
 import (
 	"context"
 	"fmt"
+
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/logger"
 	"github.com/segmentio/kafka-go"
 )
 
 type Consumer struct {
 	logger *logger.Logger
-	topic  string
 	reader *kafka.Reader
 }
 
-func NewConsumer(brokerAddr string, topic string, _logger *logger.Logger) *Consumer {
+func NewConsumer(_brokerAddr string, _topic string, _logger *logger.Logger) *Consumer {
 	c := Consumer{logger: _logger}
 	c.reader = kafka.NewReader(kafka.ReaderConfig{
-		Brokers:   []string{brokerAddr},
-		Topic:     topic,
+		Brokers:   []string{_brokerAddr},
+		Topic:     _topic,
 		Partition: 0,
 		MinBytes:  10e3, // 10KB
 		MaxBytes:  10e6, // 10MB
@@ -27,12 +27,10 @@ func NewConsumer(brokerAddr string, topic string, _logger *logger.Logger) *Consu
 }
 
 func (c *Consumer) Start() {
-
 }
 
 func (c *Consumer) Stop() {
-	err := c.reader.Close()
-	if err != nil {
+	if err := c.reader.Close(); err != nil {
 		c.logger.Warning(fmt.Sprintf("%v", err))
 	}
 }

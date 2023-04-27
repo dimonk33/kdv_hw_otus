@@ -4,12 +4,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/logger"
-	kafkaapp "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/queue/kafka"
-	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/sender"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/logger"
+	kafkaapp "github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/queue/kafka"
+	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/internal/sender"
 )
 
 var configFile string
