@@ -29,7 +29,7 @@ type Storage interface {
 }
 
 type Sender interface {
-	Send(ctx context.Context, data any) error
+	Send(ctx context.Context, data interface{}) error
 }
 
 type Notify struct {
