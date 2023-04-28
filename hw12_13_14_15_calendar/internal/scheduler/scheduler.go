@@ -9,10 +9,9 @@ import (
 )
 
 type Scheduler struct {
-	notifyTime NotifyTime
-	storage    Storage
-	sender     Sender
-	logger     Logger
+	storage Storage
+	sender  Sender
+	logger  Logger
 }
 
 type Logger interface {
@@ -44,18 +43,17 @@ type NotifyTime struct {
 	M int
 }
 
-func NewScheduler(_storage Storage, _sender Sender, _notifyTime NotifyTime, _logger Logger) *Scheduler {
+func NewScheduler(_storage Storage, _sender Sender, _logger Logger) *Scheduler {
 	s := &Scheduler{
-		storage:    _storage,
-		sender:     _sender,
-		notifyTime: _notifyTime,
-		logger:     _logger,
+		storage: _storage,
+		sender:  _sender,
+		logger:  _logger,
 	}
 
 	return s
 }
 
-func (s *Scheduler) Start(ctx context.Context) {
+func (s *Scheduler) Start(ctx context.Context, notifyTime NotifyTime) {
 	go func() {
 		ticker := time.NewTicker(time.Minute)
 		for {
@@ -64,7 +62,7 @@ func (s *Scheduler) Start(ctx context.Context) {
 				return
 			case <-ticker.C:
 				h, m, _ := time.Now().Clock()
-				if m == s.notifyTime.M && h == s.notifyTime.H {
+				if m == notifyTime.M && h == notifyTime.H {
 					s.logger.Info("отправка событий на день")
 					err := s.sendEvents(ctx)
 					if err != nil {

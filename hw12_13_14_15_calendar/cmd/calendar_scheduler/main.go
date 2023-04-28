@@ -49,15 +49,14 @@ func main() {
 
 	sender := kafkaapp.NewProducer(config.GetBroker(), config.GetTopic(), logg)
 
-	notifyHour, notifyMin := config.GetNotifyTime()
-
-	schlr := scheduler.NewScheduler(storage, sender, scheduler.NotifyTime{H: notifyHour, M: notifyMin}, logg)
+	schlr := scheduler.NewScheduler(storage, sender, logg)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
-	schlr.Start(ctx)
+	notifyHour, notifyMin := config.GetNotifyTime()
+	schlr.Start(ctx, scheduler.NotifyTime{H: notifyHour, M: notifyMin})
 
 	logg.Info("планировщик запущен...")
 
