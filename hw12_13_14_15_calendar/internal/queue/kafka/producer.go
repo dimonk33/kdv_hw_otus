@@ -16,11 +16,11 @@ type Producer struct {
 	writer *kafka.Writer
 }
 
-func NewProducer(brokerAddr string, topic string, logger *logger.Logger) *Producer {
-	p := Producer{logger: logger}
+func NewProducer(ba string, t string, l *logger.Logger) *Producer {
+	p := Producer{logger: l}
 	p.writer = &kafka.Writer{
-		Addr:                   kafka.TCP(brokerAddr),
-		Topic:                  topic,
+		Addr:                   kafka.TCP(ba),
+		Topic:                  t,
 		AllowAutoTopicCreation: true,
 		Balancer:               &kafka.LeastBytes{},
 	}
