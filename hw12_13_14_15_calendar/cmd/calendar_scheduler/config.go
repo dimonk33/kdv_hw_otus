@@ -60,19 +60,3 @@ func (c *Config) init() error {
 func (c *Config) GetDBURL() string {
 	return "postgres://" + c.Pg.User + ":" + c.Pg.Password + "@" + c.Pg.Host
 }
-
-func (c *Config) GetStorageType() int {
-	return c.Storage.Type
-}
-
-func (c *Config) GetBroker() string {
-	return c.Queue.BrokerAddr
-}
-
-func (c *Config) GetTopic() string {
-	return c.Queue.Topic
-}
-
-func (c *Config) GetNotifyTime() (int, int) {
-	return c.Notify.Hour, c.Notify.Min
-}

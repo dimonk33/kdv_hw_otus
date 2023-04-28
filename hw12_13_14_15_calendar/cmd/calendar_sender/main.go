@@ -34,7 +34,8 @@ func main() {
 	}
 	logg := logger.New(config.Logger.Level)
 
-	receiver := kafkaapp.NewConsumer(config.GetBroker(), config.GetTopic(), logg)
+	receiver := kafkaapp.NewConsumer(config.Queue.BrokerAddr, config.Queue.Topic, logg)
+	defer receiver.Stop()
 
 	notifier := sender.NewNotifier(os.Stdout)
 

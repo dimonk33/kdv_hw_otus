@@ -39,7 +39,7 @@ func main() {
 	logg := logger.New(config.Logger.Level)
 
 	var storage app.Storage
-	switch config.GetStorageType() {
+	switch config.Storage.Type {
 	case StorageInMemory:
 		storage = memorystorage.New()
 	case StorageDB:

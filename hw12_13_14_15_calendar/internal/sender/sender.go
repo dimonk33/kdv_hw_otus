@@ -36,12 +36,14 @@ func NewSender(_receiver EventReceiver, _sender NotifySender, _logger Logger) *S
 
 func (s *Sender) Start(ctx context.Context) {
 	go func() {
-		msg, err := s.eventReceiver.Read(ctx)
-		if err != nil {
-			return
-		}
-		if err = s.notifySender.Send(string(msg)); err != nil {
-			s.logger.Error("Ошибка отправки оповещения: " + err.Error())
+		for {
+			msg, err := s.eventReceiver.Read(ctx)
+			if err != nil {
+				return
+			}
+			if err = s.notifySender.Send(string(msg)); err != nil {
+				s.logger.Error("Ошибка отправки оповещения: " + err.Error())
+			}
 		}
 	}()
 }

@@ -37,7 +37,7 @@ func main() {
 	logg := logger.New(config.Logger.Level)
 
 	var storage scheduler.Storage
-	switch config.GetStorageType() {
+	switch config.Storage.Type {
 	case StorageInMemory:
 		storage = memorystorage.New()
 	case StorageDB:
@@ -47,7 +47,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	sender := kafkaapp.NewProducer(config.GetBroker(), config.GetTopic(), logg)
+	sender := kafkaapp.NewProducer(config.Queue.BrokerAddr, config.Queue.Topic, logg)
+	defer sender.Stop()
 
 	schlr := scheduler.NewScheduler(storage, sender, logg)
 
@@ -55,8 +56,7 @@ func main() {
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
-	notifyHour, notifyMin := config.GetNotifyTime()
-	schlr.Start(ctx, scheduler.NotifyTime{H: notifyHour, M: notifyMin})
+	schlr.Start(ctx, scheduler.NotifyTime{Hour: config.Notify.Hour, Minute: config.Notify.Min})
 
 	logg.Info("планировщик запущен...")
 

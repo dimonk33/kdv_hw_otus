@@ -13,20 +13,17 @@ type Consumer struct {
 	reader *kafka.Reader
 }
 
-func NewConsumer(_brokerAddr string, _topic string, _logger *logger.Logger) *Consumer {
-	c := Consumer{logger: _logger}
+func NewConsumer(brokerAddr string, topic string, logger *logger.Logger) *Consumer {
+	c := Consumer{logger: logger}
 	c.reader = kafka.NewReader(kafka.ReaderConfig{
-		Brokers:   []string{_brokerAddr},
-		Topic:     _topic,
+		Brokers:   []string{brokerAddr},
+		Topic:     topic,
 		Partition: 0,
 		MinBytes:  10e3, // 10KB
 		MaxBytes:  10e6, // 10MB
 	})
 
 	return &c
-}
-
-func (c *Consumer) Start() {
 }
 
 func (c *Consumer) Stop() {

@@ -39,8 +39,8 @@ type Notify struct {
 }
 
 type NotifyTime struct {
-	H int
-	M int
+	Hour   int
+	Minute int
 }
 
 func NewScheduler(_storage Storage, _sender Sender, _logger Logger) *Scheduler {
@@ -56,13 +56,15 @@ func NewScheduler(_storage Storage, _sender Sender, _logger Logger) *Scheduler {
 func (s *Scheduler) Start(ctx context.Context, notifyTime NotifyTime) {
 	go func() {
 		ticker := time.NewTicker(time.Minute)
+		defer ticker.Stop()
+
 		for {
 			select {
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
 				h, m, _ := time.Now().Clock()
-				if m == notifyTime.M && h == notifyTime.H {
+				if m == notifyTime.Minute && h == notifyTime.Hour {
 					s.logger.Info("отправка событий на день")
 					err := s.sendEvents(ctx)
 					if err != nil {

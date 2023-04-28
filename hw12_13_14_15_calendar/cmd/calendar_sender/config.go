@@ -33,11 +33,3 @@ func (c *Config) init() error {
 	}
 	return nil
 }
-
-func (c *Config) GetBroker() string {
-	return c.Queue.BrokerAddr
-}
-
-func (c *Config) GetTopic() string {
-	return c.Queue.Topic
-}
