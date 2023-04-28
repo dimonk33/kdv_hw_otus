@@ -73,6 +73,13 @@ func (s *Storage) ListOnMonth(ctx context.Context, year, month int) ([]storage.E
 	})
 }
 
+func (s *Storage) ListLessDate(ctx context.Context, year, month, day int) ([]storage.Event, error) {
+	return s.listItems(ctx, func(item storage.Event) bool {
+		yE, mE, dE := item.EndTime.Date()
+		return yE < year && int(mE) < month && dE < day
+	})
+}
+
 func (s *Storage) listItems(ctx context.Context, validate ValidateDate) ([]storage.Event, error) {
 	var out []storage.Event
 	var i int64 = 1

@@ -1,0 +1,10 @@
+[cron]
+    hour = 9
+    min = 0
+
+[logger]
+level = "INFO"
+
+[kafka]
+broker = "localhost:9092"
+topic = "notify"

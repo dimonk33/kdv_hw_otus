@@ -160,6 +160,27 @@ func (s *Storage) ListOnMonth(ctx context.Context, year int, month int) ([]stora
 	return s.getSliceResult(ctx, rows)
 }
 
+func (s *Storage) ListLessDate(ctx context.Context, year, month, day int) ([]storage.Event, error) {
+	var out []storage.Event
+	query := `
+		SELECT
+		    * 
+		FROM 
+		    events 
+		WHERE
+		    date(end_time) < $1`
+	rows, err := s.db.QueryContext(ctx, query, fmt.Sprintf("%d-%d-%d", year, month, day))
+	if err != nil {
+		return out, err
+	}
+	defer func() {
+		if err := rows.Close(); err != nil {
+			s.log.Warning(err.Error())
+		}
+	}()
+	return s.getSliceResult(ctx, rows)
+}
+
 func (s *Storage) getSliceResult(ctx context.Context, rows *sql.Rows) ([]storage.Event, error) {
 	var out []storage.Event
 	for rows.Next() {

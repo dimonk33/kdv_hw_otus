@@ -17,10 +17,10 @@ const (
 // при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
 type Config struct {
 	Logger     LoggerConf `mapstructure:"logger"`
-	pg         Postgres   `mapstructure:"db"`
-	httpServer Server     `mapstructure:"http"`
-	grpcServer Server     `mapstructure:"grpc"`
-	storage    Storage
+	Pg         Postgres   `mapstructure:"db"`
+	HttpServer Server     `mapstructure:"http"`
+	GrpcServer Server     `mapstructure:"grpc"`
+	Storage    Storage
 }
 
 type LoggerConf struct {
@@ -59,17 +59,13 @@ func (c *Config) init() error {
 }
 
 func (c *Config) GetDBURL() string {
-	return "postgres://" + c.pg.User + ":" + c.pg.Password + "@" + c.pg.Host
+	return "postgres://" + c.Pg.User + ":" + c.Pg.Password + "@" + c.Pg.Host
 }
 
 func (c *Config) GetHTTPServerAddr() string {
-	return net.JoinHostPort(c.httpServer.Host, strconv.Itoa(c.httpServer.Port))
+	return net.JoinHostPort(c.HttpServer.Host, strconv.Itoa(c.HttpServer.Port))
 }
 
 func (c *Config) GetGrpcServerAddr() string {
-	return net.JoinHostPort(c.grpcServer.Host, strconv.Itoa(c.grpcServer.Port))
-}
-
-func (c *Config) GetStorageType() int {
-	return c.storage.Type
+	return net.JoinHostPort(c.GrpcServer.Host, strconv.Itoa(c.GrpcServer.Port))
 }

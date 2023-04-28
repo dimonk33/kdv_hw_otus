@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	levelError = "error"
-	levelInfo  = "info"
-	levelDebug = "debug"
+	LevelError = "error"
+	LevelInfo  = "info"
+	LevelDebug = "debug"
 )
 
 type Logger struct {
@@ -30,7 +30,7 @@ func New(level string) *Logger {
 }
 
 func (l Logger) Info(msg string) {
-	if l.level == levelInfo || l.level == levelDebug {
+	if l.level == LevelInfo || l.level == LevelDebug {
 		l.infoLog.Println(msg)
 	}
 }
@@ -40,13 +40,13 @@ func (l Logger) Error(msg string) {
 }
 
 func (l Logger) Warning(msg string) {
-	if l.level != levelError {
+	if l.level != LevelError {
 		l.warningLog.Println(msg)
 	}
 }
 
 func (l Logger) Debug(msg string) {
-	if l.level == levelDebug {
+	if l.level == LevelDebug {
 		l.debugLog.Println(msg)
 	}
 }

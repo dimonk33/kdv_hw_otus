@@ -20,7 +20,7 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "/etc/calendar/calendar_config.toml", "Path to configuration file")
 }
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
 	logg := logger.New(config.Logger.Level)
 
 	var storage app.Storage
-	switch config.GetStorageType() {
+	switch config.Storage.Type {
 	case StorageInMemory:
 		storage = memorystorage.New()
 	case StorageDB:
