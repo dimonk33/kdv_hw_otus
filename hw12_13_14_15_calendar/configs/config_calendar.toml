@@ -1,10 +1,13 @@
 [logger]
 level = "INFO"
 
+[storage]
+in_memory = 1
+
 [db]
 host = "localhost"
-user = "user"
-password = "password"
+user = "calendar"
+password = "calendar"
 
 [http]
 host = "localhost"
@@ -13,6 +16,3 @@ port = 8080
 [grpc]
 host = "localhost"
 port = 5555
-
-[storage]
-in_memory = 1

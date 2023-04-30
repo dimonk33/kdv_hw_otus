@@ -1,36 +1,70 @@
 version: "3.9"
+
+#volumes:
+#  db:
+#  calendar-pg-volume:
+#    external: true
+
+networks:
+  calendar-network:
+    driver: bridge
+
 services:
-#  app:
-#    container_name: hw12-app
-#    build: ../build
-#    ports:
-#      - "8080:8080"
+  app:
+    container_name: calendar-app
+    build:
+      context: ../
+      dockerfile: build/Dockerfile
+    ports:
+      - "8888:8080"
 #    restart: on-failure
-#    environment:
-#      - POSTGRES_USER=user
-#      - POSTGRES_PASSWORD=password
-#      - POSTGRES_DB=hw
-#    volumes:
-#      - ../:/usr/src/app/
-#    depends_on:
-#      - db
-#    networks:
-#      - hw12-network
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_USER=calendar
+      - POSTGRES_PASSWORD=calendar
+      - POSTGRES_DB=calendar
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - calendar-network
+
+  migration:
+    container_name: calendar-migration
+    build:
+      context: ../
+      dockerfile: migrations/Dockerfile
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_USER=calendar
+      - POSTGRES_PASSWORD=calendar
+      - POSTGRES_DB=calendar
+      - POSTGRES_SSL=disable
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - calendar-network
 
   db:
     image: postgres:latest
-    container_name: hw12-postgres
+    container_name: calendar-postgres
     restart: always
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=hw
+      - POSTGRES_USER=calendar
+      - POSTGRES_PASSWORD=calendar
+      - POSTGRES_DB=calendar
     ports:
       - '5432:5432'
-    volumes:
-      - hw12-pg-volume:/var/lib/postgresql/data
+#    volumes:
+#      - calendar-pg-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U calendar -d calendar
+      interval: 10s
+      timeout: 3s
+      retries: 5
     networks:
-      - hw12-network
+      - calendar-network
 
   kafka:
     image: bitnami/kafka:3.1.0
@@ -55,8 +89,13 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
     ports:
       - '9092:9092'
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "host.docker.internal:9092"]
+      interval: 30s
+      timeout: 30s
+      retries: 4
     networks:
-      - hw12-network
+      - calendar-network
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -69,21 +108,6 @@ services:
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
       - SERVER_PORT=8383
     networks:
-      - hw12-network
+      - calendar-network
     depends_on:
       - kafka
-    links:
-      - kafka
-
-volumes:
-#  api:
-  db:
-  hw12-pg-volume:
-    external: true
-#  kafka-vol:
-#    external: true
-
-# Networks to be created to facilitate communication between containers
-networks:
-  hw12-network:
-    driver: bridge
