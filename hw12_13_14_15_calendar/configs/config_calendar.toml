@@ -5,7 +5,7 @@ level = "INFO"
 in_memory = 1
 
 [db]
-host = "localhost"
+host = "db"
 user = "calendar"
 password = "calendar"
 

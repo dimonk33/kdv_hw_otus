@@ -24,8 +24,8 @@ services:
       - POSTGRES_PASSWORD=calendar
       - POSTGRES_DB=calendar
     depends_on:
-      kafka:
-        condition: service_healthy
+      - init-kafka
+      - migration
     networks:
       - calendar-network
 
@@ -89,11 +89,33 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
     ports:
       - '9092:9092'
+    expose:
+      - '29092'
     healthcheck:
-      test: ["CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "host.docker.internal:9092"]
+      test: ["CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "kafka:29092"]
       interval: 30s
       timeout: 30s
       retries: 4
+    networks:
+      - calendar-network
+
+  init-kafka:
+    image: confluentinc/cp-kafka:6.1.1
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: [ '/bin/sh', '-c' ]
+    command: |
+      "
+      # blocks until kafka is reachable
+      kafka-topics --bootstrap-server kafka:29092 --list
+
+      echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic notify --replication-factor 1 --partitions 1
+
+      echo -e 'Successfully created the following topics:'
+      kafka-topics --bootstrap-server kafka:29092 --list
+      "
     networks:
       - calendar-network
 
@@ -110,4 +132,4 @@ services:
     networks:
       - calendar-network
     depends_on:
-      - kafka
+      - init-kafka

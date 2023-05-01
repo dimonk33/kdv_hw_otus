@@ -5,10 +5,14 @@ level = "INFO"
 in_memory = 1
 
 [db]
-host = "localhost"
+host = "db"
 user = "calendar"
 password = "calendar"
 
-[kafka]
-broker = "localhost:9092"
+[queue]
+broker = "kafka:9092"
 topic = "notify"
+
+[notify]
+hour = 9
+min = 0

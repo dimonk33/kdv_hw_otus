@@ -10,11 +10,11 @@ const (
 )
 
 type Config struct {
-	Notify  Time       `mapstructure:"notify"`
 	Logger  LoggerConf `mapstructure:"logger"`
+	Storage Storage    `mapstructure:"storage"`
 	Pg      Postgres   `mapstructure:"db"`
 	Queue   Queue      `mapstructure:"queue"`
-	Storage Storage    `mapstructure:"storage"`
+	Notify  Time       `mapstructure:"notify"`
 }
 
 type Time struct {
