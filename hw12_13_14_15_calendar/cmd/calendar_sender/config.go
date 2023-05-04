@@ -15,7 +15,8 @@ type LoggerConf struct {
 
 type Queue struct {
 	BrokerAddr string `mapstructure:"broker"`
-	Topic      string `mapstructure:"topic"`
+	ReadTopic  string `mapstructure:"read_topic"`
+	WriteTopic string `mapstructure:"write_topic"`
 }
 
 func NewConfig() (Config, error) {

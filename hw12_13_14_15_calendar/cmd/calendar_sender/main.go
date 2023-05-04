@@ -39,10 +39,11 @@ func main() {
 	}
 	logg := logger.New(config.Logger.Level)
 
-	receiver := kafkaapp.NewConsumer(config.Queue.BrokerAddr, config.Queue.Topic, logg)
+	receiver := kafkaapp.NewConsumer(config.Queue.BrokerAddr, config.Queue.ReadTopic, logg)
 	defer receiver.Stop()
 
-	notifier := sender.NewNotifier(os.Stdout)
+	notifier := kafkaapp.NewProducer(config.Queue.BrokerAddr, config.Queue.WriteTopic, logg)
+	defer notifier.Stop()
 
 	sndr := sender.NewSender(receiver, notifier, logg)
 

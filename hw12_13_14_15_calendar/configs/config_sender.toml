@@ -2,5 +2,6 @@
 level = "debug"
 
 [queue]
-broker = "kafka:9092"
-topic = "notify"
+broker = "kafka:29092"
+read_topic = "notify"
+write_topic = "message"

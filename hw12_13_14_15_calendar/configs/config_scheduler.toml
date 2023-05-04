@@ -10,7 +10,7 @@ user = "calendar"
 password = "calendar"
 
 [queue]
-broker = "kafka:9092"
+broker = "kafka:29092"
 topic = "notify"
 
 [notify]
