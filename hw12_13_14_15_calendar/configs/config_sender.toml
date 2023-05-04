@@ -1,5 +1,5 @@
 [logger]
-level = "INFO"
+level = "debug"
 
 [queue]
 broker = "kafka:9092"

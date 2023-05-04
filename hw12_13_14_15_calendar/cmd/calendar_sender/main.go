@@ -16,7 +16,12 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "D:\\Work\\Projects\\GolandProjects\\training\\kdv_hw_otus\\hw12_13_14_15_calendar\\configs\\config_sender.toml", "Path to configuration file")
+	flag.StringVar(
+		&configFile,
+		"config",
+		"D:\\Work\\Projects\\GolandProjects\\training\\kdv_hw_otus\\hw12_13_14_15_calendar\\configs\\config_sender.toml",
+		"Path to configuration file",
+	)
 }
 
 func main() {
@@ -47,7 +52,7 @@ func main() {
 
 	sndr.Start(ctx)
 
-	logg.Info("планировщик запущен...")
+	logg.Info("Расссыльщик запущен...")
 
 	<-ctx.Done()
 }

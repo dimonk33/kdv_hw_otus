@@ -1,8 +1,8 @@
 [logger]
-level = "INFO"
+level = "debug"
 
 [storage]
-in_memory = 1
+type = 1
 
 [db]
 host = "db"
@@ -10,9 +10,9 @@ user = "calendar"
 password = "calendar"
 
 [http]
-host = "localhost"
+host = "0.0.0.0"
 port = 8080
 
 [grpc]
-host = "localhost"
-port = 5555
+host = "0.0.0.0"
+port = 9090

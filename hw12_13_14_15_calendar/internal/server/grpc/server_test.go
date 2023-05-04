@@ -2,6 +2,7 @@ package internalgrpc
 
 import (
 	"context"
+	"strconv"
 	"testing"
 	"time"
 
@@ -66,4 +67,73 @@ func TestGrpcHandler(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("list events", func(t *testing.T) {
+		const numEvents = 20
+
+		ctx := context.Background()
+		l := logger.Logger{}
+		s := memorystorage.New()
+		a := app.New(l, s)
+		srv := NewServer(":5555", l, a)
+
+		initDate := time.Now()
+		initDate = time.Date(initDate.Year(), initDate.Month()+1, 1, 9, 0, 0, 0, time.Local)
+
+		startDate := initDate
+		for i := 0; i < numEvents; i++ {
+			endDate := startDate.Add(1 * time.Hour)
+			req := gen.CreateEventRequest{
+				Data: &gen.Event{
+					Title:     "Тестовое событие " + strconv.Itoa(i+1),
+					StartTime: timestamppb.New(startDate),
+					EndTime:   timestamppb.New(endDate),
+					OwnUserID: 1,
+				},
+			}
+			resp, err := srv.CreateEvent(ctx, &req)
+			require.NoError(t, err)
+			require.Greater(t, resp.GetID(), int64(0))
+
+			startDate = startDate.AddDate(0, 0, 1)
+		}
+
+		req := gen.ListEventOnDateRequest{
+			Year:  int32(initDate.Year()),
+			Month: int32(initDate.Month()),
+			Day:   int32(initDate.Day() + 1),
+		}
+		resp, err := srv.ListEventOnDate(ctx, &req)
+		require.NoError(t, err)
+		list := resp.GetData()
+		require.Equal(t, len(list), 1)
+
+		y, w := initDate.ISOWeek()
+		reqW := gen.ListEventOnWeekRequest{
+			Year: int32(y),
+			Week: int32(w + 1),
+		}
+		respW, errW := srv.ListEventOnWeek(ctx, &reqW)
+		require.NoError(t, errW)
+		list = respW.GetData()
+		require.Equal(t, len(list), 7)
+
+		reqM := gen.ListEventOnMonthRequest{
+			Year:  int32(initDate.Year()),
+			Month: int32(initDate.Month()),
+		}
+		respM, errM := srv.ListEventOnMonth(ctx, &reqM)
+		require.NoError(t, errM)
+		list = respM.GetData()
+		require.Equal(t, len(list), numEvents)
+
+		for _, ev := range list {
+			reqDel := gen.DeleteEventRequest{
+				ID: ev.GetID(),
+			}
+			respDel, errDel := srv.DeleteEvent(ctx, &reqDel)
+			require.NoError(t, errDel)
+			require.Nil(t, respDel.GetErr())
+		}
+	})
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/dimonk33/kdv_hw_otus/hw12_13_14_15_calendar/api/gen"
@@ -160,11 +161,10 @@ func (s *Server) UpdateEvent(ctx context.Context, req *gen.UpdateEventRequest) (
 
 	err := s.worker.UpdateEvent(ctx, &data)
 
-	var res *gen.UpdateEventResult
+	res := &gen.UpdateEventResult{Err: nil}
 	if err != nil {
-		res = &gen.UpdateEventResult{Err: &gen.Error{Description: err.Error()}}
+		res.Err = &gen.Error{Description: err.Error()}
 	}
-
 	return res, nil
 }
 
@@ -175,9 +175,9 @@ func (s *Server) DeleteEvent(ctx context.Context, req *gen.DeleteEventRequest) (
 
 	err := s.worker.DeleteEvent(ctx, req.ID)
 
-	var res *gen.DeleteEventResult
+	res := &gen.DeleteEventResult{Err: nil}
 	if err != nil {
-		res = &gen.DeleteEventResult{Err: &gen.Error{Description: err.Error()}}
+		res.Err = &gen.Error{Description: err.Error()}
 	}
 	return res, nil
 }
@@ -193,11 +193,14 @@ func (s *Server) ListEventOnDate(
 		return nil, errors.New("неверная дата")
 	}
 	data, err := s.worker.ListEventOnDate(ctx, y, m, d)
+	s.logger.Info("event on date " + strconv.Itoa(d) + "-" + strconv.Itoa(m) + " = " + strconv.Itoa(len(data)))
 
 	res := &gen.ListEventOnDateResult{Data: s.convertListData(data)}
 	if err != nil {
 		res.Err = &gen.Error{Description: err.Error()}
 	}
+	s.logger.Info(fmt.Sprintf("%+v\n", res))
+
 	return res, nil
 }
 
@@ -211,11 +214,13 @@ func (s *Server) ListEventOnWeek(
 		return nil, errors.New("неверная дата")
 	}
 	data, err := s.worker.ListEventOnWeek(ctx, y, w)
+	s.logger.Info("event on week " + strconv.Itoa(w) + " = " + strconv.Itoa(len(data)))
 
 	res := &gen.ListEventOnWeekResult{Data: s.convertListData(data)}
 	if err != nil {
 		res.Err = &gen.Error{Description: err.Error()}
 	}
+	s.logger.Info(fmt.Sprintf("%+v\n", res))
 
 	return res, nil
 }
@@ -230,11 +235,13 @@ func (s *Server) ListEventOnMonth(
 		return nil, errors.New("неверная дата")
 	}
 	data, err := s.worker.ListEventOnMonth(ctx, y, m)
+	s.logger.Info("event on month " + strconv.Itoa(m) + " = " + strconv.Itoa(len(data)))
 
 	res := &gen.ListEventOnMonthResult{Data: s.convertListData(data)}
 	if err != nil {
 		res.Err = &gen.Error{Description: err.Error()}
 	}
+	s.logger.Info(fmt.Sprintf("%+v\n", res))
 
 	return res, nil
 }

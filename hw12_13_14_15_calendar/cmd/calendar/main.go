@@ -20,7 +20,12 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/calendar_config.toml", "Path to configuration file")
+	flag.StringVar(
+		&configFile,
+		"config",
+		"D:\\Work\\Projects\\GolandProjects\\training\\kdv_hw_otus\\hw12_13_14_15_calendar\\configs\\config_calendar.toml",
+		"Path to configuration file",
+	)
 }
 
 func main() {
@@ -50,8 +55,8 @@ func main() {
 	}
 	calendar := app.New(logg, storage)
 
-	grpcServer := internalgrpc.NewServer(config.GetHTTPServerAddr(), logg, calendar)
-	httpServer := internalhttp.NewServer(config.GetGrpcServerAddr(), logg, grpcServer)
+	grpcServer := internalgrpc.NewServer(config.GetGrpcServerAddr(), logg, calendar)
+	httpServer := internalhttp.NewServer(config.GetHTTPServerAddr(), logg, grpcServer)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)

@@ -10,14 +10,31 @@ networks:
     driver: bridge
 
 services:
-  app:
+  calendar:
     container_name: calendar-app
     build:
       context: ../
-      dockerfile: build/Dockerfile
+      dockerfile: build/calendar/Dockerfile
     ports:
       - "8888:8080"
-#    restart: on-failure
+      - "9190:9090"
+    restart: on-failure
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_USER=calendar
+      - POSTGRES_PASSWORD=calendar
+      - POSTGRES_DB=calendar
+    depends_on:
+      - migration
+    networks:
+      - calendar-network
+
+  scheduler:
+    container_name: scheduler-app
+    build:
+      context: ../
+      dockerfile: build/calendar_scheduler/Dockerfile
+    restart: on-failure
     environment:
       - POSTGRES_HOST=db
       - POSTGRES_USER=calendar
@@ -26,6 +43,17 @@ services:
     depends_on:
       - init-kafka
       - migration
+    networks:
+      - calendar-network
+
+  sender:
+    container_name: sender-app
+    build:
+      context: ../
+      dockerfile: build/calendar_sender/Dockerfile
+    restart: on-failure
+    depends_on:
+      - init-kafka
     networks:
       - calendar-network
 
@@ -101,6 +129,7 @@ services:
 
   init-kafka:
     image: confluentinc/cp-kafka:6.1.1
+    container_name: kafka-topics
     depends_on:
       kafka:
         condition: service_healthy
@@ -121,7 +150,7 @@ services:
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
-    container_name: kafka_ui
+    container_name: kafka-ui
     ports:
       - "8383:8383"
     restart: always
