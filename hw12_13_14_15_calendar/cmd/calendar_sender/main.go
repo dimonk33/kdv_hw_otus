@@ -19,7 +19,7 @@ func init() {
 	flag.StringVar(
 		&configFile,
 		"config",
-		"D:\\Work\\Projects\\GolandProjects\\training\\kdv_hw_otus\\hw12_13_14_15_calendar\\configs\\config_sender.toml",
+		"./config_sender.toml",
 		"Path to configuration file",
 	)
 }
