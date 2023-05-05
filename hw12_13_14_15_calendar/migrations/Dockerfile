@@ -12,5 +12,6 @@ WORKDIR /migrate
 
 COPY ./migrations/*.sql .
 COPY ./migrations/entrypoint.sh .
+RUN chmod +x /migrate/entrypoint.sh
 
 ENTRYPOINT ["/migrate/entrypoint.sh"]
