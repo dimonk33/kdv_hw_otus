@@ -1,4 +1,4 @@
-.PHONY: build run build-img run-img version test lint migrate generate integration-test
+.PHONY: build run build-img run-img version test lint migrate generate up down integration-tests
 
 BIN_CALENDAR := "./bin/calendar"
 BIN_SCHEDULER := "./bin/calendar_scheduler"
@@ -47,10 +47,16 @@ migrate:
 generate:
 	cd api && mkdir gen ; go generate ; cd ..
 
-integration-test:
+up:
+	docker-compose -f deployments/docker-compose.yaml up --build -d ;
+
+down:
+	docker-compose -f deployments/docker-compose.yaml down ;
+
+integration-tests:
 	set -e ;\
-	docker-compose -f docker-compose.test.yml up --build -d ;\
+	docker-compose -f deployments/docker-compose.test.yaml up --build -d ;\
 	test_status_code=0 ;\
-	docker-compose -f docker-compose.test.yml run integration_tests go test || test_status_code=$$? ;\
-	docker-compose -f docker-compose.test.yml down ;\
+	docker-compose -f deployments/docker-compose.test.yaml run integration_tests go test -tags integration || test_status_code=$$? ;\
+	docker-compose -f deployments/docker-compose.test.yaml down ;\
 	exit $$test_status_code ;

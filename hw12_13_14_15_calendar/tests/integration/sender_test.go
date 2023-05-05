@@ -52,7 +52,7 @@ func (s *SenderSuite) SetupTest() {
 
 }
 
-func (s *SenderSuite) TestCreateEventSuccess() {
+func (s *SenderSuite) TestSendEventSuccess() {
 	event := scheduler.Notify{
 		ID:    1,
 		Title: "тестовое событие 1",
