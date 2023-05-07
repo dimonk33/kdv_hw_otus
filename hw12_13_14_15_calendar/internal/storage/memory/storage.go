@@ -15,7 +15,7 @@ type Storage struct {
 }
 
 func New() *Storage {
-	db := make(map[int64]storage.Event, 1)
+	db := make(map[int64]storage.Event)
 	return &Storage{db: db, id: 1}
 }
 
@@ -82,17 +82,9 @@ func (s *Storage) ListLessDate(ctx context.Context, year, month, day int) ([]sto
 
 func (s *Storage) listItems(ctx context.Context, validate ValidateDate) ([]storage.Event, error) {
 	var out []storage.Event
-	var i int64 = 1
-	var ok bool
-	var item storage.Event
-
-	for {
-		s.mu.RLock()
-		item, ok = s.db[i]
-		s.mu.RUnlock()
-		if !ok {
-			break
-		}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	for _, item := range s.db {
 		select {
 		case <-ctx.Done():
 			return out, ctx.Err()
@@ -101,7 +93,6 @@ func (s *Storage) listItems(ctx context.Context, validate ValidateDate) ([]stora
 				out = append(out, item)
 			}
 		}
-		i++
 	}
 
 	return out, nil

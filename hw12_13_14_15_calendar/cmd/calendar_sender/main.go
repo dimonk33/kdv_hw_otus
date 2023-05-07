@@ -16,7 +16,12 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/sender_config.toml", "Path to configuration file")
+	flag.StringVar(
+		&configFile,
+		"config",
+		"./config_sender.toml",
+		"Path to configuration file",
+	)
 }
 
 func main() {
@@ -34,10 +39,11 @@ func main() {
 	}
 	logg := logger.New(config.Logger.Level)
 
-	receiver := kafkaapp.NewConsumer(config.Queue.BrokerAddr, config.Queue.Topic, logg)
+	receiver := kafkaapp.NewConsumer(config.Queue.BrokerAddr, config.Queue.ReadTopic, logg)
 	defer receiver.Stop()
 
-	notifier := sender.NewNotifier(os.Stdout)
+	notifier := kafkaapp.NewProducer(config.Queue.BrokerAddr, config.Queue.WriteTopic, logg)
+	defer notifier.Stop()
 
 	sndr := sender.NewSender(receiver, notifier, logg)
 
@@ -47,7 +53,7 @@ func main() {
 
 	sndr.Start(ctx)
 
-	logg.Info("планировщик запущен...")
+	logg.Info("Расссыльщик запущен...")
 
 	<-ctx.Done()
 }

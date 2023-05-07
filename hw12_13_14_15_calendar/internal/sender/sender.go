@@ -18,7 +18,7 @@ type Logger interface {
 }
 
 type NotifySender interface {
-	Send(msg string) error
+	Send(ctx context.Context, data interface{}) error
 }
 
 type EventReceiver interface {
@@ -41,7 +41,7 @@ func (s *Sender) Start(ctx context.Context) {
 			if err != nil {
 				return
 			}
-			if err = s.notifySender.Send(string(msg)); err != nil {
+			if err = s.notifySender.Send(ctx, string(msg)); err != nil {
 				s.logger.Error("Ошибка отправки оповещения: " + err.Error())
 			}
 		}

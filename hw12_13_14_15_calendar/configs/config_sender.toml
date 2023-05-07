@@ -1,10 +1,7 @@
-[cron]
-    hour = 9
-    min = 0
-
 [logger]
-level = "INFO"
+level = "debug"
 
-[kafka]
-broker = "localhost:9092"
-topic = "notify"
+[queue]
+broker = "kafka:29092"
+read_topic = "notify"
+write_topic = "message"

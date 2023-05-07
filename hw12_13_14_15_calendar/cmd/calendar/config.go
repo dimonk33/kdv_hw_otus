@@ -20,7 +20,7 @@ type Config struct {
 	Pg         Postgres   `mapstructure:"db"`
 	HttpServer Server     `mapstructure:"http"`
 	GrpcServer Server     `mapstructure:"grpc"`
-	Storage    Storage
+	Storage    Storage    `mapstructure:"storage"`
 }
 
 type LoggerConf struct {

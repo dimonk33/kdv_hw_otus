@@ -12,7 +12,7 @@ CREATE TABLE events (
                        PRIMARY KEY(id),
                        CONSTRAINT fk_user
                            FOREIGN KEY(own_user_id)
-                               REFERENCES hw.public.users(id)
+                               REFERENCES users(id)
 
 );
 -- +goose StatementEnd

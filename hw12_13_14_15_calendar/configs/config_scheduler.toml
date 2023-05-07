@@ -1,14 +1,18 @@
 [logger]
-level = "INFO"
-
-[db]
-host = "localhost"
-user = "user"
-password = "password"
-
-[kafka]
-broker = "localhost:9092"
-topic = "notify"
+level = "debug"
 
 [storage]
-in_memory = 1
+type = 1
+
+[db]
+host = "db"
+user = "calendar"
+password = "calendar"
+
+[queue]
+broker = "kafka:29092"
+topic = "notify"
+
+[notify]
+hour = 9
+min = 0
